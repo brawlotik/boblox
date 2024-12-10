@@ -7,7 +7,7 @@ frame.Parent = screenGui
 
 frame.Size = UDim2.new(1, 0, 1, 0) -- Полноэкранный
 frame.BackgroundColor3 = Color3.new(0, 0, 0) -- Черный цвет
-frame.BackgroundTransparency = 0.5 -- Прозрачность
+frame.BackgroundTransparency = 0 -- Прозрачность
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
