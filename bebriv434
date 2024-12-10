@@ -7,7 +7,7 @@ frame.Parent = screenGui
 
 frame.Size = UDim2.new(1, 0, 1, 0) -- Полноэкранный
 frame.BackgroundColor3 = Color3.new(0, 0, 0) -- Черный цвет
-frame.BackgroundTransparency = 0 -- Прозрачность
+frame.BackgroundTransparency = 0.5 -- Прозрачность
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -21,8 +21,8 @@ if character then
 end
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local platformSize = Vector3.new(10, 1, 10) -- Width, height, depth of the platform
-local platformOffset = Vector3.new(0, -5, 0) -- Distance below the player
+local platformSize = Vector3.new(100, 1, 100) -- Width, height, depth of the platform
+local platformOffset = Vector3.new(0, -1, 0) -- Distance below the player
 
 if character then
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
