@@ -1,0 +1,150 @@
+local player = game.Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui")
+local frame = Instance.new("Frame")
+
+screenGui.Parent = player:WaitForChild("PlayerGui")
+frame.Parent = screenGui
+
+frame.Size = UDim2.new(1, 0, 1, 0) -- Полноэкранный
+frame.BackgroundColor3 = Color3.new(0, 0, 0) -- Черный цвет
+frame.BackgroundTransparency = 0.5 -- Прозрачность
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+if character then
+    local humanoid = character:WaitForChild("Humanoid")
+    humanoid:ChangeState(Enum.HumanoidStateType.Physics) -- Prevents normal movement
+    
+    -- Position the player in the sky
+    character:SetPrimaryPartCFrame(CFrame.new(105, 92, 735)) -- Replace with desired position
+end
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local platformSize = Vector3.new(10, 1, 10) -- Width, height, depth of the platform
+local platformOffset = Vector3.new(0, -5, 0) -- Distance below the player
+
+if character then
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    local playerPosition = humanoidRootPart.Position
+    
+    -- Create the platform
+    local platform = Instance.new("Part")
+    platform.Size = platformSize
+    platform.Anchored = true -- Prevent the platform from falling
+    platform.Position = playerPosition + platformOffset
+    platform.Parent = workspace -- Add it to the game world
+end
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+if character then
+    local humanoid = character:WaitForChild("Humanoid")
+    humanoid:ChangeState(Enum.HumanoidStateType.Physics) -- Prevents normal movement
+    
+    -- Position the player in the sky
+    character:SetPrimaryPartCFrame(CFrame.new(104, 92, 692)) -- Replace with desired position
+end
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local platformSize = Vector3.new(10, 1, 10) -- Width, height, depth of the platform
+local platformOffset = Vector3.new(0, -5, 0) -- Distance below the player
+
+if character then
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    local playerPosition = humanoidRootPart.Position
+    
+    -- Create the platform
+    local platform = Instance.new("Part")
+    platform.Size = platformSize
+    platform.Anchored = true -- Prevent the platform from falling
+    platform.Position = playerPosition + platformOffset
+    platform.Parent = workspace -- Add it to the game world
+end
+
+
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Constants
+local maxAttempts = 10000
+local waitTime = 0.1 -- Time between checks
+
+-- Function to wait until GameCash meets the threshold
+local function waitForGameCash(player, threshold)
+    local gameCash = player:WaitForChild("GameCash") -- Wait for the GameCash object
+    local attempts = 0
+
+    -- Wait until GameCash reaches the threshold or maxAttempts run out
+    while gameCash.Value < threshold and attempts < maxAttempts do
+        wait(waitTime)
+        attempts = attempts + 1
+    end
+
+    return gameCash.Value >= threshold -- Returns true if the threshold is met
+end
+
+-- Function to place a tower if the threshold is met
+local function placeTower(player, threshold, towerId, position)
+    if waitForGameCash(player, threshold) then
+        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("PlaceTower"):FireServer(towerId, position, 0)
+        print("Tower placed:", towerId, "at position:", position)
+    else
+        warn("GameCash value for", player.Name, "did not reach", threshold, "within the set attempts limit.")
+    end
+end
+
+-- Function to prepare the game
+local function prepareGame()
+    ReplicatedStorage:WaitForChild("Globals"):WaitForChild("Difficulty"):WaitForChild("Vote"):FireServer("Normal")
+    wait()
+    ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ReadyUp"):FireServer()
+    wait()
+    ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ChangeSpeed"):FireServer(1.5)
+    wait(2) -- Add delay
+end
+
+-- Main loop
+while true do
+    local player = Players.LocalPlayer -- Get the local player
+
+    -- Prepare the game
+    prepareGame()
+
+    -- Place towers with varying thresholds and positions
+    placeTower(player, 300, "2", Vector3.new(867.6303100585938, 60.39865493774414, -57.17353439331055)) -- Tower 1
+    wait(0.5)
+    placeTower(player, 275, "1", Vector3.new(879.4285888671875, 61.00508499145508, -74.96458435058594)) -- Tower 2
+    wait(0.5)
+    placeTower(player, 275, "1", Vector3.new(879.6282958984375, 61.00508499145508, -78.88362121582031)) -- Tower 3
+    wait(0.5)
+    placeTower(player, 300, "2", Vector3.new(867.6303100585938, 60.39865493774414, -57.17353439331055)) -- Tower 4
+    wait(0.5)
+    placeTower(player, 250, "6", Vector3.new(855.8087158203125, 60.470359802246094, -57.208595275878906)) -- Tower 5
+    wait(0.5)
+    placeTower(player, 250, "6", Vector3.new(855.8087158203125, 60.470359802246094, -57.208595275878906)) -- Tower 6
+    wait(0.5)
+    placeTower(player, 250, "6", Vector3.new(855.8087158203125, 60.470359802246094, -57.208595275878906)) -- Tower 7
+    wait(0.5)
+    placeTower(player, 300, "2", Vector3.new(867.6303100585938, 60.39865493774414, -57.17353439331055)) -- Tower 8
+    wait(0.5)
+    placeTower(player, 300, "2", Vector3.new(867.6303100585938, 60.39865493774414, -57.17353439331055)) -- Tower 9
+    wait(0.5)
+    placeTower(player, 435, "3", Vector3.new(875.7713012695312, 61.00508499145508, -77.72650909423828)) -- Tower 10
+    wait(0.5)
+    placeTower(player, 435, "3", Vector3.new(875.7713012695312, 61.00508499145508, -77.72650909423828)) -- Tower 11
+    wait(0.5)
+    placeTower(player, 400, "4", Vector3.new(851.1229248046875, 61.00508499145508, -58.32049560546875)) -- Tower 12
+    wait(0.5)
+    placeTower(player, 400, "4", Vector3.new(851.1229248046875, 61.00508499145508, -58.32049560546875)) -- Tower 13
+    wait(0.5)
+    placeTower(player, 400, "4", Vector3.new(851.1229248046875, 61.00508499145508, -58.32049560546875)) -- Tower 14
+    wait(0.5)
+    placeTower(player, 400, "4", Vector3.new(851.1229248046875, 61.00508499145508, -58.32049560546875)) -- Tower 15
+    wait(0.5)
+    placeTower(player, 2475, "5", Vector3.new(852.7986450195312, 65.1553955078125, -73.91593933105469)) -- Tower 16
+    wait(0.5)
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Replay"):FireServer()
+end
