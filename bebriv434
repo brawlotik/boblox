@@ -146,5 +146,18 @@ while true do
     wait(0.5)
     placeTower(player, 2475, "5", Vector3.new(852.7986450195312, 65.1553955078125, -73.91593933105469)) -- Tower 16
     wait(0.5)
-game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Replay"):FireServer()
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Replay"):FireServer()
+    wait(0.5)
+    repeat wait() until game.CoreGui:FindFirstChild('RobloxPromptGui')
+
+local lp,po,ts = game:GetService('Players').LocalPlayer,game.CoreGui.RobloxPromptGui.promptOverlay,game:GetService('TeleportService')
+
+po.ChildAdded:connect(function(a)
+    if a.Name == 'ErrorPrompt' then
+        repeat
+            ts:Teleport(game.PlaceId)
+            wait(2)
+        until false
+    end
+end)
 end
