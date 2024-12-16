@@ -148,7 +148,32 @@ while true do
     wait(0.5)
     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Replay"):FireServer()
     wait(0.5)
-    repeat wait() until game.CoreGui:FindFirstChild('RobloxPromptGui')
+ local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local idleTime = 0
+local idleLimit = 15 * 60 -- 15 минут в секундах
+
+-- Сброс времени простоя при активности
+local function resetIdleTime()
+    idleTime = 0
+end
+
+-- Отслеживание ввода
+LocalPlayer.Idled:Connect(function()
+    -- Увеличение времени простоя
+    idleTime = idleTime + 1
+    if idleTime >= idleLimit then
+        TeleportService:Teleport(game.PlaceId)
+    end
+end)
+
+-- Отслеживание активности (сброс времени простоя)
+game:GetService("UserInputService").InputBegan:Connect(resetIdleTime)
+game:GetService("UserInputService").InputEnded:Connect(resetIdleTime)
+wait(0.5)
+repeat wait() until game.CoreGui:FindFirstChild('RobloxPromptGui')
 
 local lp,po,ts = game:GetService('Players').LocalPlayer,game.CoreGui.RobloxPromptGui.promptOverlay,game:GetService('TeleportService')
 
@@ -160,4 +185,5 @@ po.ChildAdded:connect(function(a)
         until false
     end
 end)
+    
 end
