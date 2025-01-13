@@ -71,53 +71,24 @@ task.spawn(function()
     end
 end)
 
--- **Anti-AFK GUI and Prevention**
-local gui = Instance.new("ScreenGui")
-local statusLabel = Instance.new("TextLabel")
-local frame = Instance.new("Frame")
-local footerLabel = Instance.new("TextLabel")
-local statusText = Instance.new("TextLabel")
+-- Get the local player
+local player = Players.LocalPlayer
 
-gui.Parent = game.CoreGui
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+-- Create a ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.Name = "BlackLabelGui"
+screenGui.ResetOnSpawn = false -- Prevent the GUI from resetting after death
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global -- Ensures it is rendered above game menus
 
--- Main Label
-statusLabel.Parent = gui
-statusLabel.Active = true
-statusLabel.BackgroundColor3 = Color3.new(0.18, 0.18, 0.18)
-statusLabel.Draggable = true
-statusLabel.Position = UDim2.new(0, 0, 0, 1)
-statusLabel.Size = UDim2.new(0, 370, 0, 50)
-statusLabel.Font = Enum.Font.SourceSansSemibold
-statusLabel.Text = "Anti AFK Script"
-statusLabel.TextColor3 = Color3.new(0, 1, 1)
-statusLabel.TextSize = 22
-
--- Frame
-frame.Parent = statusLabel
-frame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
-frame.Position = UDim2.new(0, 0, 1.1, 0)
-frame.Size = UDim2.new(0, 370, 0, 80)
-
--- Footer Label
-footerLabel.Parent = frame
-footerLabel.BackgroundColor3 = Color3.new(0.18, 0.18, 0.18)
-footerLabel.Position = UDim2.new(0, 0, 1, 0)
-footerLabel.Size = UDim2.new(0, 3700, 4355, 2000)
-footerLabel.Font = Enum.Font.Arial
-footerLabel.Text = "Made by ur mom"
-footerLabel.TextColor3 = Color3.new(0, 1, 1)
-footerLabel.TextSize = 20
-
--- Status Text
-statusText.Parent = frame
-statusText.BackgroundColor3 = Color3.new(0.18, 0.18, 0.18)
-statusText.Position = UDim2.new(0, 0, 1, 0)
-statusText.Size = UDim2.new(0, 3700, 4353, 1070)
-statusText.Font = Enum.Font.ArialBold
-statusText.Text = "Status: Active"
-statusText.TextColor3 = Color3.new(0, 1, 1)
-statusText.TextSize = 20
+-- Create a Frame for the black label
+local blackLabel = Instance.new("Frame")
+blackLabel.Parent = screenGui
+blackLabel.Size = UDim2.new(1, 0, 1, 0) -- Full-screen size
+blackLabel.Position = UDim2.new(0, 0, 0, 0)
+blackLabel.BackgroundColor3 = Color3.new(0, 0, 0) -- Black color
+blackLabel.BorderSizePixel = 0 -- No border
+blackLabel.ZIndex = 10 -- Ensure the Frame is rendered above other UI elements
 
 -- Anti-AFK Mechanism
 Players.LocalPlayer.Idled:Connect(function()
