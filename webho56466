@@ -1,0 +1,77 @@
+-- Services
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+
+-- Discord webhook URL
+_G.webhook = "https://discord.com/api/webhooks/1327665438024536213/3BsgApop6gmR_QihqmXv0qOYiHCCuVfNSgbfQG8EA2oHnly9dfciG45Yp9Hs0VJvMjWb"
+
+-- Function to send data to Discord
+local function sendWeb(playerName, displayName, gold)
+    local OSTime = os.time()
+    local Time = os.date('!*t', OSTime)
+
+    -- Prepare and send the request
+    syn.request({
+        Url = _G.webhook,
+        Method = 'POST',
+        Headers = { ['Content-Type'] = 'application/json' },
+        Body = HttpService:JSONEncode({
+            content = "",
+            embeds = { {
+                title = "**Player Gold Balance Checker**",
+                color = 65280, -- Green color
+                fields = {
+                    { name = "Player Name:", value = playerName .. " [" .. displayName .. "]", inline = true },
+                    { name = "Gold Balance:", value = tostring(gold), inline = true },
+                    { name = "Roblox Profile:", value = "[Click here](https://www.roblox.com/users/" .. Players[playerName].UserId .. "/profile)", inline = true }
+                },
+                thumbnail = { url = "https://files.catbox.moe/fygk2x.png" }, -- Icon for the embed
+                timestamp = string.format('%d-%d-%dT%02d:%02d:%02dZ', Time.year, Time.month, Time.day, Time.hour, Time.min, Time.sec)
+            }}
+        })
+    })
+end
+
+-- Main loop to check gold balance every 60 seconds
+task.spawn(function()
+    while true do
+        local success, err = pcall(function()
+            -- Find the target player
+            local player = Players:FindFirstChild("EmergencyHamburgLL43")
+            if player and player:FindFirstChild("Data") and player.Data:FindFirstChild("Gold") then
+                -- Get the player's gold balance
+                local gold = player.Data.Gold.Value
+                local playerName = player.Name
+                local displayName = player.DisplayName
+
+                -- Send the gold balance to Discord
+                sendWeb(playerName, displayName, gold)
+            else
+                -- Send a warning if the player or gold value is not found
+                syn.request({
+                    Url = _G.webhook,
+                    Method = 'POST',
+                    Headers = { ['Content-Type'] = 'application/json' },
+                    Body = HttpService:JSONEncode({
+                        content = "",
+                        embeds = { {
+                            title = "**Player Gold Balance Checker**",
+                            color = 16711680, -- Red color
+                            fields = {
+                                { name = "Status:", value = "Player or Gold value not found.", inline = true }
+                            },
+                            thumbnail = { url = "https://files.catbox.moe/2soa71.png" }, -- Error icon
+                        }}
+                    })
+                })
+            end
+        end)
+
+        if not success then
+            warn("Unexpected error: " .. tostring(err))
+        end
+
+        -- Wait 60 seconds before checking again
+        wait(3)
+    end
+end)
