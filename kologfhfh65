@@ -65,7 +65,7 @@ task.spawn(function()
     while true do
         isRenderingEnabled = not isRenderingEnabled
         RunService:Set3dRenderingEnabled(isRenderingEnabled)
-        task.wait(60) -- Toggle every 60 seconds
+        task.wait(1) -- Toggle every 60 seconds
     end
 end)
 
@@ -100,8 +100,8 @@ frame.Size = UDim2.new(0, 370, 0, 80)
 -- Footer Label
 footerLabel.Parent = frame
 footerLabel.BackgroundColor3 = Color3.new(0.18, 0.18, 0.18)
-footerLabel.Position = UDim2.new(0, 0, 0.8, 0)
-footerLabel.Size = UDim2.new(0, 370, 0, 20)
+footerLabel.Position = UDim2.new(0, 0, 1, 0)
+footerLabel.Size = UDim2.new(0, 3700, 0, 2000)
 footerLabel.Font = Enum.Font.Arial
 footerLabel.Text = "Made by ur mom"
 footerLabel.TextColor3 = Color3.new(0, 1, 1)
@@ -110,8 +110,8 @@ footerLabel.TextSize = 20
 -- Status Text
 statusText.Parent = frame
 statusText.BackgroundColor3 = Color3.new(0.18, 0.18, 0.18)
-statusText.Position = UDim2.new(0, 0, 0.2, 0)
-statusText.Size = UDim2.new(0, 370, 0, 40)
+statusText.Position = UDim2.new(0, 0, 1, 0)
+statusText.Size = UDim2.new(0, 3700, 0, 1070)
 statusText.Font = Enum.Font.ArialBold
 statusText.Text = "Status: Active"
 statusText.TextColor3 = Color3.new(0, 1, 1)
