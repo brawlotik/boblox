@@ -1,0 +1,127 @@
+-- Services
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local VirtualUser = game:GetService("VirtualUser")
+
+-- **Function to set transparency of all BaseParts**
+local function setTransparency(object)
+    if object:IsA("BasePart") and object.Transparency ~= 1 then
+        object.Transparency = 1
+    end
+end
+
+-- **Function to set material of all BaseParts to Plastic**
+local function setMaterialToPlastic(object)
+    if object:IsA("BasePart") and object.Material ~= Enum.Material.Plastic then
+        object.Material = Enum.Material.Plastic
+    end
+end
+
+-- **Function to process all parts in Workspace**
+local function processWorkspace()
+    for _, object in pairs(Workspace:GetDescendants()) do
+        setTransparency(object)
+        setMaterialToPlastic(object)
+    end
+end
+
+-- Initial processing for existing parts
+processWorkspace()
+
+-- Event: Process new parts added to Workspace
+Workspace.DescendantAdded:Connect(function(object)
+    setTransparency(object)
+    setMaterialToPlastic(object)
+end)
+
+-- Periodic Cleanup (Optional)
+task.spawn(function()
+    while true do
+        processWorkspace()
+        task.wait(5) -- Adjust interval as needed
+    end
+end)
+
+-- **Function to clear Lighting**
+local function clearLighting()
+    for _, object in pairs(Lighting:GetChildren()) do
+        object:Destroy()
+    end
+end
+
+-- Initial cleanup of Lighting
+clearLighting()
+
+-- Event: Destroy new objects added to Lighting
+Lighting.ChildAdded:Connect(function(child)
+    child:Destroy()
+end)
+
+-- **Toggle 3D Rendering**
+task.spawn(function()
+    local isRenderingEnabled = true
+    while true do
+        isRenderingEnabled = not isRenderingEnabled
+        RunService:Set3dRenderingEnabled(isRenderingEnabled)
+        task.wait(60) -- Toggle every 60 seconds
+    end
+end)
+
+-- **Anti-AFK GUI and Prevention**
+local gui = Instance.new("ScreenGui")
+local statusLabel = Instance.new("TextLabel")
+local frame = Instance.new("Frame")
+local footerLabel = Instance.new("TextLabel")
+local statusText = Instance.new("TextLabel")
+
+gui.Parent = game.CoreGui
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Main Label
+statusLabel.Parent = gui
+statusLabel.Active = true
+statusLabel.BackgroundColor3 = Color3.new(0.18, 0.18, 0.18)
+statusLabel.Draggable = true
+statusLabel.Position = UDim2.new(0, 0, 0, 1)
+statusLabel.Size = UDim2.new(0, 370, 0, 50)
+statusLabel.Font = Enum.Font.SourceSansSemibold
+statusLabel.Text = "Anti AFK Script"
+statusLabel.TextColor3 = Color3.new(0, 1, 1)
+statusLabel.TextSize = 22
+
+-- Frame
+frame.Parent = statusLabel
+frame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+frame.Position = UDim2.new(0, 0, 1.1, 0)
+frame.Size = UDim2.new(0, 370, 0, 80)
+
+-- Footer Label
+footerLabel.Parent = frame
+footerLabel.BackgroundColor3 = Color3.new(0.18, 0.18, 0.18)
+footerLabel.Position = UDim2.new(0, 0, 0.8, 0)
+footerLabel.Size = UDim2.new(0, 370, 0, 20)
+footerLabel.Font = Enum.Font.Arial
+footerLabel.Text = "Made by ur mom"
+footerLabel.TextColor3 = Color3.new(0, 1, 1)
+footerLabel.TextSize = 20
+
+-- Status Text
+statusText.Parent = frame
+statusText.BackgroundColor3 = Color3.new(0.18, 0.18, 0.18)
+statusText.Position = UDim2.new(0, 0, 0.2, 0)
+statusText.Size = UDim2.new(0, 370, 0, 40)
+statusText.Font = Enum.Font.ArialBold
+statusText.Text = "Status: Active"
+statusText.TextColor3 = Color3.new(0, 1, 1)
+statusText.TextSize = 20
+
+-- Anti-AFK Mechanism
+Players.LocalPlayer.Idled:Connect(function()
+    VirtualUser:CaptureController()
+    VirtualUser:ClickButton2(Vector2.new())
+    statusText.Text = "Roblox tried to kick you, but I stopped it!"
+    task.wait(2)
+    statusText.Text = "Status: Active"
+end)
