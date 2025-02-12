@@ -1,0 +1,25 @@
+local teleport_table = {
+    location1 = Vector3.new(-1678, 5, 2796), -- целевая позиция
+}
+
+local tween_s = game:GetService('TweenService')
+local lp = game.Players.LocalPlayer
+
+-- Скорость движения (блоков в секунду)
+local speed = 20
+
+function bypass_teleport(v)
+    if lp.Character and lp.Character:FindFirstChild('HumanoidRootPart') then
+        local rootPart = lp.Character.HumanoidRootPart
+        local distance = (rootPart.Position - v).Magnitude -- Расстояние до цели
+        local time = distance / speed -- Вычисляем время анимации
+
+        local tweeninfo = TweenInfo.new(time, Enum.EasingStyle.Linear) -- Используем рассчитанное время
+        local cf = CFrame.new(v)
+        local a = tween_s:Create(rootPart, tweeninfo, {CFrame = cf})
+        a:Play()
+    end
+end
+
+-- Вызываем функцию для телепортации
+bypass_teleport(teleport_table.location1)
