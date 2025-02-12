@@ -1,1 +1,18 @@
-game:GetService("ReplicatedStorage"):WaitForChild("3ZJ"):WaitForChild("839b6897-d63d-4e5e-811c-9f770a56c2d0"):FireServer("Radar Gun")
+-- Логирование начала выполнения
+print("stack begin")
+
+-- Проверка и вызов первого удаленного события
+local eventContainer = game:GetService("ReplicatedStorage"):WaitForChild("3ZJ")
+if eventContainer then
+    local event = eventContainer:WaitForChild("839b6897-d63d-4e5e-811c-9f770a56c2d0")
+    if event then
+        event:FireServer("Radar Gun")
+    else
+        warn("Event not found: 839b6897-d63d-4e5e-811c-9f770a56c2d0")
+    end
+else
+    warn("Event container not found)
+end
+
+-- Логирование завершения выполнения
+print("stack end")
