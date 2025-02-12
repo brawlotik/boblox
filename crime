@@ -1,0 +1,20 @@
+while true do wait()
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local workspace = game:GetService("Workspace")
+
+-- Извлекаем позицию из объекта
+local targetVehicle = workspace:FindFirstChild("Vehicles") and workspace.Vehicles:FindFirstChild("GreenvilleSS65")
+local targetPosition = targetVehicle and targetVehicle.WorldPivot.Position or Vector3.new(0, 0, 0) -- Запасное значение
+
+local args = {
+    [1] = Players.LocalPlayer.Character:FindFirstChild("Radar Gun"),
+    [2] = targetPosition,
+    [3] = Vector3.new(0.5342116951942444, -0.063494473695755, 0.8429628014564514)
+}
+
+-- Отправляем запрос в ReplicatedStorage
+local remoteEvent = ReplicatedStorage:WaitForChild("3ZJ"):WaitForChild("0590fa6a-adc6-4497-9098-e146bb954efc")
+if remoteEvent then
+    remoteEvent:FireServer(unpack(args))
+end
