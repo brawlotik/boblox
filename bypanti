@@ -1,0 +1,38 @@
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+local platforms = {} -- Храним созданные плиты
+local spawnTime = 10 * 60 -- Время работы (10 минут в секундах)
+local startTime = tick() -- Запоминаем время старта
+
+local function spawnPlatform()
+    -- Проверяем, не истекло ли 10 минут
+    if tick() - startTime >= spawnTime then
+        print("Прошло 10 минут! Остановка спавна плит.")
+        return
+    end
+
+    local platform = Instance.new("Part") -- Создаем плиту
+    platform.Size = Vector3.new(5, 1, 5) -- Размер плиты
+    platform.Position = rootPart.Position - Vector3.new(0, 3, 0) -- Под игроком
+    platform.Anchored = true -- Фиксируем в пространстве
+    platform.Transparency = 1 -- Делаем плиту невидимой
+    platform.CanCollide = true -- Оставляем столкновение
+    platform.Parent = game.Workspace -- Добавляем в игру
+
+    table.insert(platforms, platform) -- Добавляем в массив
+
+    -- Удаляем старые плиты (оставляем не более 10)
+    if #platforms > 10 then
+        local oldPlatform = table.remove(platforms, 1) -- Удаляем первую плиту
+        if oldPlatform then
+            oldPlatform:Destroy()
+        end
+    end
+end
+
+while tick() - startTime < spawnTime do
+    spawnPlatform()
+    wait(0.1) -- Ждем 0.1 секунду перед следующим спавном
+end
