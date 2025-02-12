@@ -1,39 +1,41 @@
-local args = {
-    [1] = "Patrol Police"
-}
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 
-game:GetService("ReplicatedStorage"):FindFirstChild("3ZJ"):FindFirstChild("057dbba8-6870-4a8d-a525-f89ed5cb3bfc"):FireServer(unpack(args))
+local lp = Players.LocalPlayer
+local speed = 20 -- Скорость перемещения (блоков в секунду)
 
-wait(1)
-
-local args = {
-    [1] = "Patrol Police"
-}
-
-game:GetService("ReplicatedStorage").W2k:FindFirstChild("1289a55e-6af1-4481-b43d-6633a8e28351"):FireServer(unpack(args))
-wait(1)
-local teleport_table = {
-    location1 = Vector3.new(-1684, 5, 2854), -- целевая позиция
-}
-
-local tween_s = game:GetService('TweenService')
-local lp = game.Players.LocalPlayer
-
--- Скорость движения (блоков в секунду)
-local speed = 20
-
-function bypass_teleport(v)
-    if lp.Character and lp.Character:FindFirstChild('HumanoidRootPart') then
-        local rootPart = lp.Character.HumanoidRootPart
-        local distance = (rootPart.Position - v).Magnitude -- Расстояние до цели
-        local time = distance / speed -- Вычисляем время анимации
-
-        local tweeninfo = TweenInfo.new(time, Enum.EasingStyle.Linear) -- Используем рассчитанное время
-        local cf = CFrame.new(v)
-        local a = tween_s:Create(rootPart, tweeninfo, {CFrame = cf})
-        a:Play()
+-- Отправка событий в ReplicatedStorage
+local function sendEvent(storage, id, action)
+    local event = storage:FindFirstChild(id)
+    if event then
+        event:FireServer(action)
     end
 end
 
--- Вызываем функцию для телепортации
-bypass_teleport(teleport_table.location1)
+-- Выполняем команды для "Patrol Police"
+sendEvent(ReplicatedStorage, "3ZJ", "Patrol Police")
+wait(1)
+sendEvent(ReplicatedStorage.W2k, "1289a55e-6af1-4481-b43d-6633a8e28351", "Patrol Police")
+wait(1)
+
+-- Таблица с точками телепортации
+local teleportPoints = {
+    location1 = Vector3.new(-1684, 5, 2854)
+}
+
+-- Функция плавного перемещения
+local function smoothTeleport(targetPosition)
+    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+        local rootPart = lp.Character.HumanoidRootPart
+        local distance = (rootPart.Position - targetPosition).Magnitude
+        local time = distance / speed -- Рассчитываем время движения
+
+        local tweenInfo = TweenInfo.new(time, Enum.EasingStyle.Linear)
+        local tween = TweenService:Create(rootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+        tween:Play()
+    end
+end
+
+-- Запускаем плавную телепортацию
+smoothTeleport(teleportPoints.location1)
