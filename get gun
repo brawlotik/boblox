@@ -1,0 +1,1 @@
+game:GetService("ReplicatedStorage"):WaitForChild("3ZJ"):WaitForChild("839b6897-d63d-4e5e-811c-9f770a56c2d0"):FireServer("Radar Gun")
