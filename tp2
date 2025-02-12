@@ -60,7 +60,7 @@ local function smoothTeleport(target)
        math.abs(RootPart.Position.Y - target.Y) < 1 and 
        math.abs(RootPart.Position.Z - target.Z) < 1 then
         reachedTarget = true -- Останавливаем цикл
-        print("Целевая точка достигнута! Спавн плит остановлен.")
+        print("done 2")
     end
 end
 
