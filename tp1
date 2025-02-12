@@ -15,6 +15,7 @@ local spawnInterval = 0.1
 local teleportTarget = Vector3.new(-1678, 5, 2796)
 local teleportSpeed = 10
 local reachedTarget = false -- Флаг для остановки спавна
+local minHeight = 150 -- Минимальная высота, на которой игрок будет двигаться к цели
 
 local function spawnPlatform()
     if reachedTarget or tick() - startTime >= spawnDuration then return end
@@ -45,33 +46,40 @@ end)
 local function smoothTeleport(target)
     if not RootPart then return end
 
-    -- Поднимаем игрока на 30 блоков вверх
-    local riseTarget = RootPart.Position + Vector3.new(0, 80, 0)
-    local riseDistance = (RootPart.Position - riseTarget).Magnitude
-    local riseDuration = riseDistance / teleportSpeed
-    local riseTweenInfo = TweenInfo.new(riseDuration, Enum.EasingStyle.Linear)
-    local riseTween = TweenService:Create(RootPart, riseTweenInfo, {CFrame = CFrame.new(riseTarget)})
+    -- Вычисляем начальную позицию на заданной высоте
+    local startPosition = Vector3.new(RootPart.Position.X, minHeight, RootPart.Position.Z)
 
-    riseTween:Play()
-    riseTween.Completed:Wait()
+    -- Поднимаем игрока на заданную высоту, если он ниже
+    if RootPart.Position.Y < minHeight then
+        local riseTweenInfo = TweenInfo.new((minHeight - RootPart.Position.Y) / teleportSpeed, Enum.EasingStyle.Linear)
+        local riseTween = TweenService:Create(RootPart, riseTweenInfo, {CFrame = CFrame.new(startPosition)})
+        riseTween:Play()
+        riseTween.Completed:Wait()
+    end
 
-    -- Теперь перемещаем игрока к целевой позиции
-    local distance = (RootPart.Position - target).Magnitude
-    local duration = distance / teleportSpeed
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-    local tween = TweenService:Create(RootPart, tweenInfo, {CFrame = CFrame.new(target)})
+    -- Двигаемся к целевой точке на заданной высоте
+    local horizontalTarget = Vector3.new(target.X, minHeight, target.Z)
+    local horizontalDistance = (RootPart.Position - horizontalTarget).Magnitude
+    local horizontalDuration = horizontalDistance / teleportSpeed
+    local horizontalTweenInfo = TweenInfo.new(horizontalDuration, Enum.EasingStyle.Linear)
+    local horizontalTween = TweenService:Create(RootPart, horizontalTweenInfo, {CFrame = CFrame.new(horizontalTarget)})
 
-    tween:Play()
+    horizontalTween:Play()
+    horizontalTween.Completed:Wait()
 
-    -- Ждем завершения телепорта
-    tween.Completed:Wait()
+    -- Опускаем игрока на целевую точку
+    local descentTweenInfo = TweenInfo.new((minHeight - target.Y) / teleportSpeed, Enum.EasingStyle.Linear)
+    local descentTween = TweenService:Create(RootPart, descentTweenInfo, {CFrame = CFrame.new(target)})
+
+    descentTween:Play()
+    descentTween.Completed:Wait()
 
     -- Проверяем, находится ли игрок вблизи целевой позиции
     if math.abs(RootPart.Position.X - target.X) < 1 and 
        math.abs(RootPart.Position.Y - target.Y) < 1 and 
        math.abs(RootPart.Position.Z - target.Z) < 1 then
         reachedTarget = true -- Останавливаем цикл
-        print("done 1")
+        print("Игрок достиг цели!")
     end
 end
 
