@@ -1,41 +1,67 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local RootPart = Character:WaitForChild("HumanoidRootPart")
 
-local lp = Players.LocalPlayer
-local speed = 20 -- Скорость перемещения (блоков в секунду)
+local platforms = {}
+local spawnDuration = 600 -- 10 минут в секундах
+local startTime = tick()
+local maxPlatforms = 10
+local platformSize = Vector3.new(5, 1, 5)
+local spawnOffset = Vector3.new(0, -3, 0)
+local spawnInterval = 0.1
 
--- Отправка событий в ReplicatedStorage
-local function sendEvent(storage, id, action)
-    local event = storage:FindFirstChild(id)
-    if event then
-        event:FireServer(action)
+local teleportTarget = Vector3.new(-1684, 5, 2854)
+local teleportSpeed = 10
+local reachedTarget = false -- Флаг для остановки спавна
+
+local function spawnPlatform()
+    if reachedTarget or tick() - startTime >= spawnDuration then return end
+
+    local platform = Instance.new("Part")
+    platform.Size = platformSize
+    platform.Position = RootPart.Position + spawnOffset
+    platform.Anchored = true
+    platform.Transparency = 1
+    platform.CanCollide = true
+    platform.Parent = workspace
+
+    table.insert(platforms, platform)
+    
+    if #platforms > maxPlatforms then
+        platforms[1]:Destroy()
+        table.remove(platforms, 1)
     end
 end
 
--- Выполняем команды для "Patrol Police"
-sendEvent(ReplicatedStorage, "3ZJ", "Patrol Police")
-wait(1)
-sendEvent(ReplicatedStorage.W2k, "1289a55e-6af1-4481-b43d-6633a8e28351", "Patrol Police")
-wait(1)
+task.spawn(function()
+    while not reachedTarget and tick() - startTime < spawnDuration do
+        spawnPlatform()
+        task.wait(spawnInterval)
+    end
+end)
 
--- Таблица с точками телепортации
-local teleportPoints = {
-    location1 = Vector3.new(-1684, 5, 2854)
-}
+local function smoothTeleport(target)
+    if not RootPart then return end
 
--- Функция плавного перемещения
-local function smoothTeleport(targetPosition)
-    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-        local rootPart = lp.Character.HumanoidRootPart
-        local distance = (rootPart.Position - targetPosition).Magnitude
-        local time = distance / speed -- Рассчитываем время движения
+    local distance = (RootPart.Position - target).Magnitude
+    local duration = distance / teleportSpeed
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(RootPart, tweenInfo, {CFrame = CFrame.new(target)})
 
-        local tweenInfo = TweenInfo.new(time, Enum.EasingStyle.Linear)
-        local tween = TweenService:Create(rootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
-        tween:Play()
+    tween:Play()
+
+    -- Ждем завершения телепорта
+    tween.Completed:Wait()
+
+    -- Проверяем, находится ли игрок вблизи целевой позиции
+    if math.abs(RootPart.Position.X - target.X) < 1 and 
+       math.abs(RootPart.Position.Y - target.Y) < 1 and 
+       math.abs(RootPart.Position.Z - target.Z) < 1 then
+        reachedTarget = true -- Останавливаем цикл
+        print("Целевая точка достигнута! Спавн плит остановлен.")
     end
 end
 
--- Запускаем плавную телепортацию
-smoothTeleport(teleportPoints.location1)
+smoothTeleport(teleportTarget)
