@@ -1,0 +1,97 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local RootPart = Character:WaitForChild("HumanoidRootPart")
+
+local platforms = {}
+local spawnDuration = 600 -- 10 минут в секундах
+local startTime = tick()
+local maxPlatforms = 10
+local platformSize = Vector3.new(5, 1, 5)
+local spawnOffset = Vector3.new(0, -3, 0)
+local spawnInterval = 0.1
+
+local teleportTarget = Vector3.new(-1678, 5, 2796)
+local teleportSpeed = 10
+local reachedTarget = false -- Флаг для остановки спавна
+local minHeight = 30 -- Минимальная высота, на которой игрок будет двигаться к цели
+local proximityThreshold = 5 -- Расстояние, на котором игрок считается "рядом" с целевой позицией
+
+local function spawnPlatform()
+    if reachedTarget or tick() - startTime >= spawnDuration then return end
+
+    local platform = Instance.new("Part")
+    platform.Size = platformSize
+    platform.Position = RootPart.Position + spawnOffset
+    platform.Anchored = true
+    platform.Transparency = 1
+    platform.CanCollide = true
+    platform.Parent = workspace
+
+    table.insert(platforms, platform)
+    
+    if #platforms > maxPlatforms then
+        platforms[1]:Destroy()
+        table.remove(platforms, 1)
+    end
+end
+
+task.spawn(function()
+    while not reachedTarget and tick() - startTime < spawnDuration do
+        spawnPlatform()
+        task.wait(spawnInterval)
+    end
+end)
+
+local function isPlayerNearTarget()
+    local distance = (RootPart.Position - teleportTarget).Magnitude
+    return distance <= proximityThreshold
+end
+
+local function smoothTeleport(target)
+    if not RootPart then return end
+
+    -- Проверяем, находится ли игрок рядом с целевой позицией
+    if isPlayerNearTarget() then
+        print("Игрок уже рядом с целевой позицией. Телепортация пропущена.")
+        reachedTarget = true
+        return
+    end
+
+    -- Вычисляем начальную позицию на заданной высоте
+    local startPosition = Vector3.new(RootPart.Position.X, minHeight, RootPart.Position.Z)
+
+    -- Поднимаем игрока на заданную высоту, если он ниже
+    if RootPart.Position.Y < minHeight then
+        local riseTweenInfo = TweenInfo.new((minHeight - RootPart.Position.Y) / teleportSpeed, Enum.EasingStyle.Linear)
+        local riseTween = TweenService:Create(RootPart, riseTweenInfo, {CFrame = CFrame.new(startPosition)})
+        riseTween:Play()
+        riseTween.Completed:Wait()
+    end
+
+    -- Двигаемся к целевой точке на заданной высоте
+    local horizontalTarget = Vector3.new(target.X, minHeight, target.Z)
+    local horizontalDistance = (RootPart.Position - horizontalTarget).Magnitude
+    local horizontalDuration = horizontalDistance / teleportSpeed
+    local horizontalTweenInfo = TweenInfo.new(horizontalDuration, Enum.EasingStyle.Linear)
+    local horizontalTween = TweenService:Create(RootPart, horizontalTweenInfo, {CFrame = CFrame.new(horizontalTarget)})
+
+    horizontalTween:Play()
+    horizontalTween.Completed:Wait()
+
+    -- Опускаем игрока на целевую точку
+    local descentTweenInfo = TweenInfo.new((minHeight - target.Y) / teleportSpeed, Enum.EasingStyle.Linear)
+    local descentTween = TweenService:Create(RootPart, descentTweenInfo, {CFrame = CFrame.new(target)})
+
+    descentTween:Play()
+    descentTween.Completed:Wait()
+
+    -- Проверяем, находится ли игрок вблизи целевой позиции
+    if isPlayerNearTarget() then
+        reachedTarget = true -- Останавливаем цикл
+        print("Игрок достиг цели!")
+    end
+end
+
+smoothTeleport(teleportTarget)
