@@ -1,7 +1,5 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local RootPart = Character:WaitForChild("HumanoidRootPart")
@@ -14,8 +12,12 @@ local platformSize = Vector3.new(5, 1, 5)
 local spawnOffset = Vector3.new(0, -3, 0)
 local spawnInterval = 0.1
 
+local teleportTarget = Vector3.new(-1678, 5, 2796)
+local teleportSpeed = 20
+local reachedTarget = false -- Флаг для остановки спавна
+
 local function spawnPlatform()
-    if tick() - startTime >= spawnDuration then return end
+    if reachedTarget or tick() - startTime >= spawnDuration then return end
 
     local platform = Instance.new("Part")
     platform.Size = platformSize
@@ -34,14 +36,11 @@ local function spawnPlatform()
 end
 
 task.spawn(function()
-    while tick() - startTime < spawnDuration do
+    while not reachedTarget and tick() - startTime < spawnDuration do
         spawnPlatform()
         task.wait(spawnInterval)
     end
 end)
-
-local teleportTarget = Vector3.new(-1678, 5, 2796)
-local teleportSpeed = 20
 
 local function smoothTeleport(target)
     if not RootPart then return end
@@ -49,35 +48,20 @@ local function smoothTeleport(target)
     local distance = (RootPart.Position - target).Magnitude
     local duration = distance / teleportSpeed
     local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(RootPart, tweenInfo, {CFrame = CFrame.new(target)})
 
-    TweenService:Create(RootPart, tweenInfo, {CFrame = CFrame.new(target)}):Play()
+    tween:Play()
+
+    -- Ждем завершения телепорта
+    tween.Completed:Wait()
+
+    -- Проверяем, находится ли игрок вблизи целевой позиции
+    if math.abs(RootPart.Position.X - target.X) < 1 and 
+       math.abs(RootPart.Position.Y - target.Y) < 1 and 
+       math.abs(RootPart.Position.Z - target.Z) < 1 then
+        reachedTarget = true -- Останавливаем цикл
+        print("Целевая точка достигнута! Спавн плит остановлен.")
+    end
 end
 
 smoothTeleport(teleportTarget)
-
--- Выполнение команд FireServer
-task.wait(1)
-
-local function executeCommands()
-    local args = { "Patrol Police" }
-
-    local event1 = ReplicatedStorage:FindFirstChild("3ZJ")
-    if event1 then
-        local subEvent1 = event1:FindFirstChild("057dbba8-6870-4a8d-a525-f89ed5cb3bfc")
-        if subEvent1 then
-            subEvent1:FireServer(unpack(args))
-        end
-    end
-
-    task.wait(1)
-
-    local event2 = ReplicatedStorage:FindFirstChild("W2k")
-    if event2 then
-        local subEvent2 = event2:FindFirstChild("1289a55e-6af1-4481-b43d-6633a8e28351")
-        if subEvent2 then
-            subEvent2:FireServer(unpack(args))
-        end
-    end
-end
-
-executeCommands()
