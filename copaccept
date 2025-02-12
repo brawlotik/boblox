@@ -1,3 +1,2 @@
 game:GetService("ReplicatedStorage"):FindFirstChild("3ZJ"):FindFirstChild("057dbba8-6870-4a8d-a525-f89ed5cb3bfc"):FireServer("Patrol Police")
-wait(1)
-game:GetService("ReplicatedStorage").W2k:FindFirstChild("1289a55e-6af1-4481-b43d-6633a8e28351"):FireServer("Patrol Police")
+
