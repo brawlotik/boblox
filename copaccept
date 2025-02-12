@@ -1,11 +1,17 @@
 local repetitions = 5  -- Количество повторений
 
+-- Первый цикл
+print("stack begin: First loop")
 for i = 1, repetitions do
     game:GetService("ReplicatedStorage"):FindFirstChild("3ZJ"):FindFirstChild("057dbba8-6870-4a8d-a525-f89ed5cb3bfc"):FireServer("Patrol Police")
-    wait(1)
+    task.wait(1)
 end
+print("stack end: First loop")
 
+-- Второй цикл
+print("stack begin: Second loop")
 for i = 1, repetitions do
     game:GetService("ReplicatedStorage").W2k:FindFirstChild("1289a55e-6af1-4481-b43d-6633a8e28351"):FireServer("Patrol Police")
-    wait(1)
+    task.wait(1)
 end
+print("stack end: Second loop")
