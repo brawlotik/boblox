@@ -11,7 +11,7 @@ if firstEvent then
         warn("First child not found: 057dbba8-6870-4a8d-a525-f89ed5cb3bfc")
     end
 else
-    warn("First event container not found: 3ZJ")
+    warn("First event container not found")
 end
 
 wait()  -- Краткая пауза
@@ -26,7 +26,7 @@ if secondEvent then
         warn("Second child not found: 1289a55e-6af1-4481-b43d-6633a8e28351")
     end
 else
-    warn("Second event container not found: W2k")
+    warn("Second event container not found")
 end
 
 -- Логирование завершения выполнения
