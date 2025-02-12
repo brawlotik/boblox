@@ -1,3 +1,17 @@
+local args = {
+    [1] = "Patrol Police"
+}
+
+game:GetService("ReplicatedStorage"):FindFirstChild("3ZJ"):FindFirstChild("057dbba8-6870-4a8d-a525-f89ed5cb3bfc"):FireServer(unpack(args))
+
+wait(1)
+
+local args = {
+    [1] = "Patrol Police"
+}
+
+game:GetService("ReplicatedStorage").W2k:FindFirstChild("1289a55e-6af1-4481-b43d-6633a8e28351"):FireServer(unpack(args))
+wait(1)
 local teleport_table = {
     location1 = Vector3.new(-1684, 5, 2854), -- целевая позиция
 }
