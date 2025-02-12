@@ -13,7 +13,7 @@ local spawnOffset = Vector3.new(0, -3, 0)
 local spawnInterval = 0.1
 
 local teleportTarget = Vector3.new(-1676, 5, 2745)
-local teleportSpeed = 20
+local teleportSpeed = 10
 local reachedTarget = false -- Флаг для остановки спавна
 local minHeight = 150 -- Минимальная высота, на которой игрок будет двигаться к цели
 
