@@ -46,7 +46,7 @@ local function smoothTeleport(target)
     if not RootPart then return end
 
     -- Поднимаем игрока на 30 блоков вверх
-    local riseTarget = RootPart.Position + Vector3.new(0, 50, 0)
+    local riseTarget = RootPart.Position + Vector3.new(0, 80, 0)
     local riseDistance = (RootPart.Position - riseTarget).Magnitude
     local riseDuration = riseDistance / teleportSpeed
     local riseTweenInfo = TweenInfo.new(riseDuration, Enum.EasingStyle.Linear)
