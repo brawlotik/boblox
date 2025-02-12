@@ -1,4 +1,4 @@
-loadstring(game:HttpGet(('https://raw.githubusercontent.com/brawlotik/boblox/refs/heads/main/tp1'),true))()
+loadstring(game:HttpGet(('https://raw.githubusercontent.com/brawlotik/boblox/refs/heads/main/tpp1'),true))()
 wait(1)
 loadstring(game:HttpGet(('https://raw.githubusercontent.com/brawlotik/boblox/refs/heads/main/newestco'),true))()
 wait(1)
