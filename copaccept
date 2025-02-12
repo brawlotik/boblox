@@ -1,17 +1,33 @@
-local repetitions = 5  -- Количество повторений
+-- Логирование начала выполнения
+print("stack begin")
 
--- Первый цикл
-print("stack begin: First loop")
-for i = 1, repetitions do
-    game:GetService("ReplicatedStorage"):FindFirstChild("3ZJ"):FindFirstChild("057dbba8-6870-4a8d-a525-f89ed5cb3bfc"):FireServer("Patrol Police")
-    task.wait(1)
+-- Проверка и вызов первого удаленного события
+local firstEvent = game:GetService("ReplicatedStorage"):FindFirstChild("3ZJ")
+if firstEvent then
+    local firstChild = firstEvent:FindFirstChild("057dbba8-6870-4a8d-a525-f89ed5cb3bfc")
+    if firstChild then
+        firstChild:FireServer("Patrol Police")
+    else
+        warn("First child not found: 057dbba8-6870-4a8d-a525-f89ed5cb3bfc")
+    end
+else
+    warn("First event container not found: 3ZJ")
 end
-print("stack end: First loop")
 
--- Второй цикл
-print("stack begin: Second loop")
-for i = 1, repetitions do
-    game:GetService("ReplicatedStorage").W2k:FindFirstChild("1289a55e-6af1-4481-b43d-6633a8e28351"):FireServer("Patrol Police")
-    task.wait(1)
+wait()  -- Краткая пауза
+
+-- Проверка и вызов второго удаленного события
+local secondEvent = game:GetService("ReplicatedStorage"):FindFirstChild("W2k")
+if secondEvent then
+    local secondChild = secondEvent:FindFirstChild("1289a55e-6af1-4481-b43d-6633a8e28351")
+    if secondChild then
+        secondChild:FireServer("Patrol Police")
+    else
+        warn("Second child not found: 1289a55e-6af1-4481-b43d-6633a8e28351")
+    end
+else
+    warn("Second event container not found: W2k")
 end
-print("stack end: Second loop")
+
+-- Логирование завершения выполнения
+print("stack end")
