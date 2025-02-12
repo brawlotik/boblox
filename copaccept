@@ -1,4 +1,4 @@
-local repetitions = 2  -- Количество повторений
+local repetitions = 5  -- Количество повторений
 
 for i = 1, repetitions do
     game:GetService("ReplicatedStorage"):FindFirstChild("3ZJ"):FindFirstChild("057dbba8-6870-4a8d-a525-f89ed5cb3bfc"):FireServer("Patrol Police")
