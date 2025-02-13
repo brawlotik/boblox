@@ -1,0 +1,52 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local RootPart = Character:WaitForChild("HumanoidRootPart")
+
+local workspace = game:GetService("Workspace")
+local vehiclesFolder = workspace:FindFirstChild("Vehicles")
+
+-- Бесконечный цикл
+while true do
+    local targetPosition = Vector3.new(0, 0, 0) -- Значение по умолчанию
+
+    -- Поиск позиции машины
+    if vehiclesFolder then
+        for _, vehicle in pairs(vehiclesFolder:GetChildren()) do
+            if vehicle:IsA("Model") or vehicle:IsA("Part") then
+                -- Получаем позицию машины
+                local position = vehicle:IsA("Model") and vehicle:GetPivot().Position or vehicle.Position
+                print(position) -- Выводим позицию
+
+                -- Используем первую найденную позицию
+                if targetPosition == Vector3.new(0, 0, 0) then
+                    targetPosition = position
+                end
+            end
+        end
+    else
+        warn("Папка 'Vehicles' не найдена в Workspace.")
+    end
+
+    -- Если машина не найдена, используем дефолтные координаты
+    if targetPosition == Vector3.new(0, 0, 0) then
+        warn("Машина не найдена. Использую дефолтные координаты.")
+        targetPosition = Vector3.new(-1686.9464111328125, 7.993495464324951, 2803.3828125)
+    end
+
+    -- Расчет направления камеры
+    local cameraDirection = (targetPosition - RootPart.Position).Unit
+
+    -- Подготовка аргументов для RemoteEvent
+    local args = {
+        [1] = LocalPlayer.Character:FindFirstChild("Radar Gun"),
+        [2] = targetPosition, -- Позиция машины
+        [3] = cameraDirection -- Ориентация камеры (направление на машину)
+    }
+
+    -- Отправка данных на сервер
+    game:GetService("ReplicatedStorage"):WaitForChild("3ZJ"):WaitForChild("0590fa6a-adc6-4497-9098-e146bb954efc"):FireServer(unpack(args))
+
+    -- Задержка перед следующей итерацией (например, 1 секунда)
+    task.wait(1)
+end
