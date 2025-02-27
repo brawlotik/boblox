@@ -1,108 +1,44 @@
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local car = workspace.Vehicles:FindFirstChild(LocalPlayer.Name)
+local plr = game.Players.LocalPlayer
+local chr = plr.Character
+local pos = destination() or partfind()
+local car = workspace.Vehicles[plr.Name]
 
--- Проверка, существует ли машина
-if not car then
-    warn("Машина не найдена!")
-    return
-end
+if car and pos then
+    local dist = (car.WorldPivot.Position - pos.Position).magnitude
 
--- Устанавливаем PrimaryPart машины (если не установлен)
-car.PrimaryPart = car:FindFirstChild("Body") or car:FindFirstChildWhichIsA("BasePart")
+    -- Если расстояние меньше 100, запускаем твин
+    if dist < 100 then
+        local TweenService = game:GetService("TweenService")
+        local tweenInfo = TweenInfo.new(
+            5, -- Длительность анимации (в секундах)
+            Enum.EasingStyle.Linear, -- Стиль анимации
+            Enum.EasingDirection.InOut, -- Направление анимации
+            0, -- Количество повторений
+            false, -- Обратная анимация
+            0 -- Задержка перед началом
+        )
 
--- Отключаем гравитацию
-workspace.Gravity = 0
-
--- Параметры для платформ
-local platforms = {}
-local spawnDuration = 600 -- 10 минут в секундах
-local startTime = tick()
-local maxPlatforms = 10
-local platformSize = Vector3.new(5, 1, 5)
-local spawnOffset = Vector3.new(0, -3, 0)
-local spawnInterval = 0.1
-
--- Целевая позиция для телепортации
-local teleportTarget = Vector3.new(-1678, 5, 2796)
-local teleportSpeed = 10
-local reachedTarget = false -- Флаг для остановки спавна
-
--- Функция для создания платформ
-local function spawnPlatform()
-    if reachedTarget or tick() - startTime >= spawnDuration then return end
-
-    local platform = Instance.new("Part")
-    platform.Size = platformSize
-    platform.Position = car.PrimaryPart.Position + spawnOffset
-    platform.Anchored = true
-    platform.Transparency = 1
-    platform.CanCollide = true
-    platform.Parent = workspace
-
-    table.insert(platforms, platform)
-    
-    if #platforms > maxPlatforms then
-        platforms[1]:Destroy()
-        table.remove(platforms, 1)
-    end
-end
-
--- Запуск спавна платформ в отдельном потоке
-task.spawn(function()
-    while not reachedTarget and tick() - startTime < spawnDuration do
-        spawnPlatform()
-        task.wait(spawnInterval)
-    end
-end)
-
--- Функция для плавной телепортации машины
-local function smoothTeleport(target)
-    if not car or not car.PrimaryPart then return end
-
-    local distance = (car.PrimaryPart.Position - target).Magnitude
-    local duration = distance / teleportSpeed
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-    local tween = TweenService:Create(car.PrimaryPart, tweenInfo, {CFrame = CFrame.new(target)})
-
-    tween:Play()
-
-    -- Ждем завершения телепортации
-    tween.Completed:Wait()
-
-    -- Проверяем, достигнута ли целевая позиция
-    if math.abs(car.PrimaryPart.Position.X - target.X) < 1 and 
-       math.abs(car.PrimaryPart.Position.Y - target.Y) < 1 and 
-       math.abs(car.PrimaryPart.Position.Z - target.Z) < 1 then
-        reachedTarget = true -- Останавливаем цикл
-        print("Машина достигла цели!")
-    end
-end
-
--- Функция для перемещения машины к целевой позиции
-local function moveCarToPosition(target)
-    if not car or not car.PrimaryPart then return end
-
-    local distance = (car.PrimaryPart.Position - target).Magnitude
-    if distance > 100 then
-        local tweenInfo = TweenInfo.new(0, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, false, 0)
-        local tweenValue = Instance.new("CFrameValue")
-        tweenValue.Value = car.PrimaryPart.CFrame
-
-        tweenValue.Changed:Connect(function()
-            car:PivotTo(tweenValue.Value)
-        end)
-
-        local tween = TweenService:Create(tweenValue, tweenInfo, {Value = target + Vector3.new(0, 1000, 0)})
-        tween:Play()
+        -- Создаем твин для перемещения машины
+        local tween = TweenService:Create(car, tweenInfo, { CFrame = pos.CFrame })
+        tween:Play() -- Запускаем твин
 
         -- Ожидаем завершения твина
         tween.Completed:Wait()
+
+        -- Восстанавливаем гравитацию
+        workspace.Gravity = 196
+
+        -- Перемещаем машину к автобусным остановкам
+        for _, v in pairs(workspace.BusStops:GetDescendants()) do
+            if v.Name == "SelectionBox" and v.Visible then
+                car:PivotTo(v.Parent.CFrame + Vector3.new(0, 5, 0))
+            end
+        end
+
+        -- Ожидаем, пока игрок не отдалится от целевой позиции
+        local startTime = tick()
+        repeat
+            task.wait()
+        until partfind() == nil or (plr:DistanceFromCharacter(pos.Position) > 70) or (tick() - startTime >= 5)
     end
 end
-
--- Пример использования
-smoothTeleport(teleportTarget) -- Плавная телепортация машины к целевой позиции
-moveCarToPosition(teleportTarget) -- Перемещение машины к целевой позиции с использованием TweenService
