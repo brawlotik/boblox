@@ -1,0 +1,47 @@
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local RootPart = Character:WaitForChild("HumanoidRootPart")
+
+local teleportSpeed = 10
+
+local function getDealerPosition()
+    local dealer = workspace:FindFirstChild("Ignore")
+    if dealer then
+        dealer = dealer:FindFirstChild("Dealer")
+    end
+
+    if dealer then
+        return dealer.Position -- Берем координаты дилера
+    else
+        warn("Не удалось найти Dealer в workspace.Ignore!")
+        return nil
+    end
+end
+
+local function smoothTeleport(target)
+    if not RootPart then return end
+
+    local distance = (RootPart.Position - target).Magnitude
+    local duration = distance / teleportSpeed
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(RootPart, tweenInfo, {CFrame = CFrame.new(target)})
+
+    tween:Play()
+    tween.Completed:Wait()
+
+    if (RootPart.Position - target).Magnitude < 1 then
+        print("Телепортация к Dealer завершена.")
+    end
+end
+
+local function teleportToDealer()
+    local target = getDealerPosition()
+    if target then
+        smoothTeleport(target)
+    end
+end
+
+teleportToDealer()
