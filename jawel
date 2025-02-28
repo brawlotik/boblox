@@ -7,9 +7,10 @@ local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local RootPart = Character:WaitForChild("HumanoidRootPart")
 
 local teleportSpeed = 10
-local reachedTarget = false
 
-local function getTeleportTarget()
+-- Функция для получения всех целевых объектов и их позиций
+local function getAllTeleportTargets()
+    local targets = {}
     local targetObject = workspace:FindFirstChild("Rob_Alarm")
     if targetObject then
         targetObject = targetObject:FindFirstChild("Robberys")
@@ -22,13 +23,14 @@ local function getTeleportTarget()
         for _, child in ipairs(targetObject:GetChildren()) do
             local itemHolder = child:FindFirstChild("ItemHolder")
             if itemHolder and #itemHolder:GetChildren() > 0 then
-                return itemHolder, itemHolder:GetChildren()[1].Position -- Берем первый объект и сам ItemHolder
+                table.insert(targets, {itemHolder = itemHolder, position = itemHolder:GetChildren()[1].Position})
             end
         end
     end
-    return nil, nil
+    return targets
 end
 
+-- Функция для плавной телепортации
 local function smoothTeleport(target)
     if not RootPart then return end
 
@@ -41,11 +43,11 @@ local function smoothTeleport(target)
     tween.Completed:Wait()
 
     if (RootPart.Position - target).Magnitude < 1 then
-        reachedTarget = true
         print("Телепортация завершена.")
     end
 end
 
+-- Функция для нажатия клавиши F 5 раз
 local function pressF()
     for i = 1, 5 do
         VirtualInputManager:SendKeyEvent(true, "F", false, game)
@@ -56,32 +58,39 @@ local function pressF()
     end
 end
 
-local function holdE(itemHolder)
-    if itemHolder and #itemHolder:GetChildren() > 0 then
-        VirtualInputManager:SendKeyEvent(true, "E", true, game)
-        print("Клавиша E зажата")
-        task.wait(5) -- Удерживаем E 5 секунд
-        VirtualInputManager:SendKeyEvent(false, "E", false, game)
-        print("Клавиша E отпущена")
-    else
-        print("ItemHolder пуст, не зажимаем E.")
-    end
+-- Функция для зажатия клавиши E на 3 секунды
+local function holdEKey()
+    -- Симулируем нажатие клавиши E
+    VirtualInputManager:SendKeyEvent(true, "E", false, game)
+    print("Клавиша E зажата.")
+
+    -- Ждем 3 секунды
+    task.wait(3)
+
+    -- Симулируем отпускание клавиши E
+    VirtualInputManager:SendKeyEvent(false, "E", false, game)
+    print("Клавиша E отпущена.")
 end
 
+-- Основной цикл телепортации
 local function startTeleportLoop()
-    while not reachedTarget do
-        local itemHolder, target = getTeleportTarget()
-        if target then
-            smoothTeleport(target)
-            pressF() -- Нажимаем "F" 5 раз после телепорта
-            task.wait(1) -- Ждем перед зажатием "E"
-            holdE(itemHolder) -- Зажимаем "E" только если в ItemHolder есть объекты
+    while true do
+        local targets = getAllTeleportTargets()
+        if #targets > 0 then
+            for _, targetData in ipairs(targets) do
+                local itemHolder, target = targetData.itemHolder, targetData.position
+                smoothTeleport(target)
+                pressF() -- Нажимаем "F" 5 раз после телепорта
+                task.wait(1) -- Ждем перед зажатием "E"
+                holdEKey() -- Зажимаем "E" на 3 секунды
+            end
         else
-            warn("ItemHolder пуст или отсутствует. Останавливаем телепортацию.")
+            warn("Все ItemHolder пусты. Останавливаем телепортацию.")
             break
         end
-        wait(1) -- Ждем перед следующим поиском
+        task.wait(1) -- Ждем перед следующим поиском
     end
 end
 
+-- Запуск основного цикла
 task.spawn(startTeleportLoop)
