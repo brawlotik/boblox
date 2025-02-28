@@ -1,25 +1,71 @@
-local teleportTargetObject = workspace:FindFirstChild("Rob_Alarm")
-if teleportTargetObject then
-    teleportTargetObject = teleportTargetObject:FindFirstChild("Robberys")
-end
-if teleportTargetObject then
-    teleportTargetObject = teleportTargetObject:FindFirstChild("Bank")
-end
-if teleportTargetObject then
-    teleportTargetObject = teleportTargetObject:FindFirstChild("GeldTisch")
-end
-if teleportTargetObject then
-    teleportTargetObject = teleportTargetObject:FindFirstChild("ItemHolder")
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local RootPart = Character:WaitForChild("HumanoidRootPart")
+
+-- Находим папку ItemHolder
+local itemHolder = workspace.Rob_Alarm.Robberys.Bank.GeldTisch.ItemHolder
+
+-- Функция для плавной телепортации с использованием Tween
+local function tweenGoto(targetCFrame, speed)
+    if not RootPart then return end
+
+    -- Вычисляем расстояние до цели
+    local distance = (RootPart.Position - targetCFrame.Position).Magnitude
+    local duration = distance / speed -- Время твина зависит от расстояния и скорости
+
+    -- Создаем твин
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(RootPart, tweenInfo, {CFrame = targetCFrame})
+
+    -- Запускаем твин
+    tween:Play()
+
+    -- Ждем завершения твина
+    tween.Completed:Wait()
+
+    -- Проверяем, достиг ли игрок цели
+    if (RootPart.Position - targetCFrame.Position).Magnitude < 1 then
+        print("Игрок успешно телепортирован к цели!")
+        return true
+    else
+        warn("Телепортация не завершена.")
+        return false
+    end
 end
 
-if teleportTargetObject then
-    local children = teleportTargetObject:GetChildren()
-    if #children > 0 then
-        local lastChild = children[#children] -- Берем последний объект
-        smoothTeleport(lastChild.Position)
-    else
-        warn("ItemHolder пуст, нечего телепортировать!")
+-- Функция для зажимания клавиши E на несколько секунд
+local function holdEKey(duration)
+    VirtualInputManager:SendKeyEvent(true, "E", false, game) -- Зажимаем E
+    task.wait(duration) -- Удерживаем клавишу
+    VirtualInputManager:SendKeyEvent(false, "E", false, game) -- Отпускаем E
+    print("Клавиша E была зажата на " .. duration .. " секунд.")
+end
+
+-- Основной цикл
+while true do
+    -- Проверяем, есть ли объекты в папке ItemHolder
+    local items = itemHolder:GetChildren()
+    if #items == 0 then
+        print("Папка ItemHolder пуста. Цикл завершен.")
+        break
     end
-else
-    warn("Не удалось найти ItemHolder для телепортации!")
+
+    -- Получаем первый объект в папке
+    local targetObject = items[1]
+    local targetCFrame = targetObject:GetPivot() -- Получаем CFrame объекта
+
+    -- Телепортируемся к объекту
+    local success = tweenGoto(targetCFrame, 30) -- Скорость телепортации: 30 studs/сек
+
+    -- Если телепортация успешна, зажимаем клавишу E на несколько секунд
+    if success then
+        holdEKey(3) -- Зажимаем E на 3 секунды
+    end
+
+    -- Удаляем объект после завершения (если нужно)
+    targetObject:Destroy()
+    task.wait(1) -- Небольшая задержка перед следующим циклом
 end
