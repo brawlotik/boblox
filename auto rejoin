@@ -29,12 +29,15 @@ local function getRandomServer()
 end
 
 local function rejoinRandomServer()
-    local randomServer = getRandomServer()
-    if randomServer then
-        TeleportService:TeleportToPlaceInstance(PlaceId, randomServer, LocalPlayer)
-    else
-        warn("Не удалось найти сервер для переподключения!")
+    while true do
+        local randomServer = getRandomServer()
+        if randomServer then
+            TeleportService:TeleportToPlaceInstance(PlaceId, randomServer, LocalPlayer)
+        else
+            warn("Не удалось найти сервер для переподключения!")
+        end
+        wait(2) -- Подождать перед следующим поиском (если что-то пошло не так)
     end
 end
 
-rejoinRandomServer()
+task.spawn(rejoinRandomServer)
