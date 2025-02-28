@@ -1,44 +1,25 @@
-local plr = game.Players.LocalPlayer
-local chr = plr.Character
-local pos = destination() or partfind()
-local car = workspace.Vehicles[plr.Name]
+if vehicle and vehicle:IsA("Model") then
+    if vehicle.PrimaryPart then
+        local part = vehicle.PrimaryPart -- Используем PrimaryPart модели
+        local targetPosition = Vector3.new(100, 10, 50) -- Указываем конечную позицию
 
-if car and pos then
-    local dist = (car.WorldPivot.Position - pos.Position).magnitude
+        -- Контроль скорости (чем больше значение, тем медленнее движение)
+        local speed = 10 -- Измени это значение для настройки скорости (чем больше, тем медленнее)
 
-    -- Если расстояние меньше 100, запускаем твин
-    if dist < 100 then
-        local TweenService = game:GetService("TweenService")
-        local tweenInfo = TweenInfo.new(
-            5, -- Длительность анимации (в секундах)
-            Enum.EasingStyle.Linear, -- Стиль анимации
-            Enum.EasingDirection.InOut, -- Направление анимации
-            0, -- Количество повторений
-            false, -- Обратная анимация
-            0 -- Задержка перед началом
-        )
+        -- Расчет расстояния и времени твина
+        local distance = (targetPosition - part.Position).magnitude -- Вычисляем расстояние
+        local duration = distance / speed -- Время = расстояние / скорость
 
-        -- Создаем твин для перемещения машины
-        local tween = TweenService:Create(car, tweenInfo, { CFrame = pos.CFrame })
-        tween:Play() -- Запускаем твин
+        -- Настройки твина с динамическим временем
+        local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+        local goal = {Position = targetPosition}
 
-        -- Ожидаем завершения твина
-        tween.Completed:Wait()
-
-        -- Восстанавливаем гравитацию
-        workspace.Gravity = 196
-
-        -- Перемещаем машину к автобусным остановкам
-        for _, v in pairs(workspace.BusStops:GetDescendants()) do
-            if v.Name == "SelectionBox" and v.Visible then
-                car:PivotTo(v.Parent.CFrame + Vector3.new(0, 5, 0))
-            end
-        end
-
-        -- Ожидаем, пока игрок не отдалится от целевой позиции
-        local startTime = tick()
-        repeat
-            task.wait()
-        until partfind() == nil or (plr:DistanceFromCharacter(pos.Position) > 70) or (tick() - startTime >= 5)
+        -- Создаем и запускаем твин
+        local tween = TweenService:Create(part, tweenInfo, goal)
+        tween:Play()
+    else
+        warn("У модели AGGRAND не задан PrimaryPart!")
     end
+else
+    warn("AGGRAND не является моделью или не найден!")
 end
