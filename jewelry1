@@ -5,9 +5,6 @@ local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local RootPart = Character:WaitForChild("HumanoidRootPart")
 
--- Находим папку ItemHolder
-local itemHolder = workspace.Rob_Alarm.Robberys.Bank.GeldTisch.ItemHolder
-
 -- Функция для плавной телепортации с использованием Tween
 local function tweenGoto(targetCFrame, speed)
     if not RootPart then return end
@@ -44,28 +41,40 @@ local function holdEKey(duration)
     print("Клавиша E была зажата на " .. duration .. " секунд.")
 end
 
--- Основной цикл
+-- Основной цикл для проверки всех GeldTisch
 while true do
-    -- Проверяем, есть ли объекты в папке ItemHolder
-    local items = itemHolder:GetChildren()
-    if #items == 0 then
-        print("Папка ItemHolder пуста. Цикл завершен.")
+    -- Находим все объекты с именем GeldTisch
+    local allGeldTisch = workspace:FindFirstChild("Rob_Alarm"):FindFirstChild("Robberys"):GetDescendants()
+    local foundValidTarget = false
+
+    for _, geldTisch in ipairs(allGeldTisch) do
+        if geldTisch.Name == "GeldTisch" then
+            -- Проверяем, есть ли внутри папка ItemHolder
+            local itemHolder = geldTisch:FindFirstChild("ItemHolder")
+            if itemHolder and #itemHolder:GetChildren() > 0 then
+                -- Получаем первый объект в папке ItemHolder
+                local targetObject = itemHolder:GetChildren()[1]
+                local targetCFrame = targetObject:GetPivot() -- Получаем CFrame объекта
+
+                -- Телепортируемся к объекту
+                local success = tweenGoto(targetCFrame, 30) -- Скорость телепортации: 30 studs/сек
+
+                -- Если телепортация успешна, зажимаем клавишу E на несколько секунд
+                if success then
+                    holdEKey(3) -- Зажимаем E на 3 секунды
+                    targetObject:Destroy() -- Удаляем объект после завершения
+                    foundValidTarget = true
+                    break -- Переходим к следующему GeldTisch
+                end
+            end
+        end
+    end
+
+    -- Если не найдено подходящих целей, завершаем цикл
+    if not foundValidTarget then
+        print("Нет объектов для обработки. Цикл завершен.")
         break
     end
 
-    -- Получаем первый объект в папке
-    local targetObject = items[1]
-    local targetCFrame = targetObject:GetPivot() -- Получаем CFrame объекта
-
-    -- Телепортируемся к объекту
-    local success = tweenGoto(targetCFrame, 30) -- Скорость телепортации: 30 studs/сек
-
-    -- Если телепортация успешна, зажимаем клавишу E на несколько секунд
-    if success then
-        holdEKey(3) -- Зажимаем E на 3 секунды
-    end
-
-    -- Удаляем объект после завершения (если нужно)
-    targetObject:Destroy()
     task.wait(1) -- Небольшая задержка перед следующим циклом
 end
