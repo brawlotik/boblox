@@ -10,10 +10,10 @@ local startTime = tick()
 local maxPlatforms = 10
 local platformSize = Vector3.new(5, 1, 5)
 local spawnOffset = Vector3.new(0, -3, 0)
-local spawnInterval = 0.01
+local spawnInterval = 0.1
 
-local teleportTarget = Vector3.new(-483, 45, 346)
-local teleportSpeed = 30
+local teleportTarget = Vector3.new(-469, 26, -1373)
+local teleportSpeed = 10
 local reachedTarget = false -- Флаг для остановки спавна
 
 local function spawnPlatform()
