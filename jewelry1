@@ -10,11 +10,14 @@ local startTime = tick()
 local maxPlatforms = 10
 local platformSize = Vector3.new(5, 1, 5)
 local spawnOffset = Vector3.new(0, -3, 0)
-local spawnInterval = 0.1
+local spawnInterval = 0.01
 
-local teleportTarget = Vector3.new(-469, 26, -1373)
-local teleportSpeed = 10
+local teleportSpeed = 30
 local reachedTarget = false -- Флаг для остановки спавна
+
+-- Находим целевой объект
+local targetObject = workspace.Rob_Alarm.Robberys.Bank:GetChildren()[20].ItemHolder["200"]
+local teleportTarget = targetObject.Position -- Позиция целевого объекта
 
 local function spawnPlatform()
     if reachedTarget or tick() - startTime >= spawnDuration then return end
@@ -60,8 +63,9 @@ local function smoothTeleport(target)
        math.abs(RootPart.Position.Y - target.Y) < 1 and 
        math.abs(RootPart.Position.Z - target.Z) < 1 then
         reachedTarget = true -- Останавливаем цикл
-        print("done 1")
+        print("Игрок успешно телепортирован к цели!")
     end
 end
 
+-- Выполняем телепортацию к целевой позиции
 smoothTeleport(teleportTarget)
