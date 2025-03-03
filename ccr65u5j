@@ -1,0 +1,26 @@
+local TweenService = game:GetService("TweenService")
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart") -- Главный объект игрока
+local vehicle = workspace.Vehicles:FindFirstChild("HacDoglas1") -- Найти машину
+
+local targetPosition = Vector3.new(1028, 5, 2459) -- Куда двигаться
+
+-- Настройки плавного движения
+local tweenInfo = TweenInfo.new(
+    5, -- Время перемещения (5 секунд)
+    Enum.EasingStyle.Linear,
+    Enum.EasingDirection.Out
+)
+
+-- Создаём анимации для игрока и машины
+if vehicle then
+    local playerTween = TweenService:Create(rootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+    local vehicleTween = TweenService:Create(vehicle, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+
+    -- Запускаем оба движения одновременно
+    playerTween:Play()
+    vehicleTween:Play()
+else
+    warn("Транспорт HacDoglas1 не найден!")
+end
