@@ -1,0 +1,29 @@
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+
+local function serverHop()
+    while true do
+        local success, servers = pcall(function()
+            return HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/'..game.PlaceId..'/servers/Public?sortOrder=Asc&limit=100')).data
+        end)
+
+        if success and servers then
+            for _, server in ipairs(servers) do
+                if server.playing < server.maxPlayers then
+                    TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, Players.LocalPlayer)
+                    return
+                end
+            end
+        end
+
+        -- Если сервер не найден, ждем и пробуем снова
+        wait(5)
+    end
+end
+
+game:GetService("CoreGui").RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
+    if child.Name == "ErrorPrompt" then
+        serverHop()
+    end
+end)
