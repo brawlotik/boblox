@@ -1,0 +1,30 @@
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+
+local function serverHop()
+    local success, servers = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/'..game.PlaceId..'/servers/Public?sortOrder=Asc&limit=100')).data
+    end)
+
+    if success and servers then
+        for _, server in ipairs(servers) do
+            if server.playing < server.maxPlayers then
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, Players.LocalPlayer)
+                return
+            end
+        end
+    end
+
+    -- Если сервер не найден, пробуем снова через 5 секунд
+    wait(5)
+    serverHop()
+end
+
+-- Цикл, который выполняет сервер-хоп каждые 4 минуты
+task.spawn(function()
+    while true do
+        wait(240) -- 4 минуты (220 секунд)
+        serverHop()
+    end
+end)
