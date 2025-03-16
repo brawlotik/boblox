@@ -1,0 +1,56 @@
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Marco8643/test/main/green"))()
+wait(1)
+local args = {
+    [1] = "Sahara Delivery Worker"
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("ChangeJob"):InvokeServer(unpack(args))
+wait(5)
+local args = {
+    [1] = {
+        ["ID"] = "4549"
+    }
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SpawnJobVehicle"):InvokeServer(unpack(args))
+wait(1)
+local player = game.Players.LocalPlayer -- Получаем текущего игрока
+local playerName = player.Name -- Берем его имя
+
+local args = {
+    [1] = workspace:WaitForChild("SessionVehicles"):WaitForChild(playerName .. "-Car"):WaitForChild("DriveSeat")
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SeatEV"):FireServer(unpack(args))
+wait(1)
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+local platformSize = Vector3.new(500, 1, 500) -- Размер платформы
+local spawnDelay = 1 -- Задержка между спавнами
+local maxPlatforms = 4 -- Максимальное количество платформ
+local platforms = {} -- Таблица для хранения платформ
+
+while true do
+    local platform = Instance.new("Part")
+    platform.Size = platformSize
+    platform.Position = rootPart.Position - Vector3.new(0, 3, 0) -- Спавн немного ниже игрока
+    platform.Anchored = true
+    platform.Material = Enum.Material.SmoothPlastic
+    platform.Color = Color3.fromRGB(255, 0, 0) -- Красный цвет платформы
+    platform.Parent = game.Workspace
+
+    -- Добавляем платформу в список
+    table.insert(platforms, platform)
+
+    -- Проверяем, если платформ больше, чем maxPlatforms, удаляем самую старую
+    if #platforms > maxPlatforms then
+        platforms[1]:Destroy()
+        table.remove(platforms, 1)
+    end
+
+    wait(spawnDelay)
+end
+
