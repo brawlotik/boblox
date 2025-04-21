@@ -1,0 +1,75 @@
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+-- Выключаем 3D рендеринг
+RunService:Set3dRenderingEnabled(false)
+
+-- Упрощаем освещение
+Lighting.GlobalShadows = false
+Lighting.Brightness = 0
+Lighting.FogEnd = 1e9
+Lighting.OutdoorAmbient = Color3.new(0, 0, 0)
+Lighting.EnvironmentDiffuseScale = 0
+Lighting.EnvironmentSpecularScale = 0
+Lighting.ExposureCompensation = -3
+
+-- Функция очистки визуала и прозрачности
+local function cleanVisuals(obj)
+	for _, child in ipairs(obj:GetDescendants()) do
+		-- Визуальные эффекты
+		if child:IsA("ParticleEmitter")
+		or child:IsA("Beam")
+		or child:IsA("Trail")
+		or child:IsA("Decal")
+		or child:IsA("SurfaceGui")
+		or child:IsA("BillboardGui")
+		or child:IsA("Highlight") then
+			pcall(function() child:Destroy() end)
+
+		-- Объекты сцены
+		elseif child:IsA("BasePart") or child:IsA("MeshPart") then
+			pcall(function()
+				child.Transparency = 1
+				child.CanCollide = false
+				if child:FindFirstChildOfClass("SpecialMesh") then
+					child:FindFirstChildOfClass("SpecialMesh"):Destroy()
+				end
+			end)
+		end
+	end
+end
+
+-- Очистка всего мира
+cleanVisuals(workspace)
+
+-- Персонаж игрока (эффекты, но не прозрачность!)
+player.CharacterAdded:Connect(function(char)
+	wait(1)
+	for _, child in ipairs(char:GetDescendants()) do
+		if child:IsA("ParticleEmitter") or child:IsA("Trail") then
+			child.Enabled = false
+		end
+	end
+end)
+
+-- Перехват всех новых объектов в Workspace
+workspace.DescendantAdded:Connect(function(obj)
+	wait(0.1)
+	cleanVisuals({obj})
+end)
+
+-- Другие игроки: очищаем их персонажей
+Players.PlayerAdded:Connect(function(plr)
+	plr.CharacterAdded:Connect(function(char)
+		wait(1)
+		cleanVisuals(char)
+	end)
+end)
+
+-- Очистка каждые 10 секунд на всякий
+while true do
+	wait(10)
+	cleanVisuals(workspace)
+end
