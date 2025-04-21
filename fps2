@@ -3,35 +3,38 @@ local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Выключить 3D рендеринг (полностью)
+-- Выключить 3D рендеринг
 RunService:Set3dRenderingEnabled(false)
 
--- Снизить графику и освещение до минимума
+-- Настройки освещения (супер минимальные)
 Lighting.GlobalShadows = false
 Lighting.Brightness = 0
-Lighting.ClockTime = 14 -- белый день
-Lighting.FogEnd = 100 -- ограничиваем дальность отрисовки
+Lighting.ClockTime = 14
 Lighting.FogStart = 0
+Lighting.FogEnd = 100 -- резко ограничиваем отрисовку
 Lighting.OutdoorAmbient = Color3.new(0, 0, 0)
 Lighting.EnvironmentDiffuseScale = 0
 Lighting.EnvironmentSpecularScale = 0
 Lighting.ExposureCompensation = -5
 
--- Отключение теней от камеры
+-- Камера – меньше угол обзора
 if workspace.CurrentCamera then
-	workspace.CurrentCamera.FieldOfView = 40 -- уменьшить угол обзора
+	workspace.CurrentCamera.FieldOfView = 40
 end
 
--- Удаляем все визуальные компоненты + текстуры
-local function stripVisuals(object)
-	for _, child in ipairs(object:GetDescendants()) do
-		pcall(function()
-			-- Визуальные эффекты
-			if child:IsA("Decal") or child:IsA("Texture") or child:IsA("SurfaceGui") or
-			   child:IsA("BillboardGui") or child:IsA("ParticleEmitter") or child:IsA("Trail") or
-			   child:IsA("Beam") or child:IsA("Highlight") then
-				child:Destroy()
+-- Очищаем визуальные компоненты МИРА, но не персонажа игрока
+local function stripVisuals(obj)
+	for _, child in ipairs(obj:GetDescendants()) do
+		-- Игнорируем персонажа игрока
+		if LocalPlayer.Character and child:IsDescendantOf(LocalPlayer.Character) then
+			continue
+		end
 
+		pcall(function()
+			if child:IsA("Decal") or child:IsA("Texture") or child:IsA("SurfaceGui")
+			or child:IsA("BillboardGui") or child:IsA("ParticleEmitter")
+			or child:IsA("Trail") or child:IsA("Beam") or child:IsA("Highlight") then
+				child:Destroy()
 			elseif child:IsA("BasePart") or child:IsA("MeshPart") then
 				child.Material = Enum.Material.SmoothPlastic
 				child.Transparency = 1
@@ -43,21 +46,22 @@ local function stripVisuals(object)
 	end
 end
 
--- Очистка текущего мира
+-- Применяем ко всему миру
 stripVisuals(workspace)
 
--- Удалить UI
+-- Удаляем UI (если нужно)
 for _, ui in ipairs(LocalPlayer:WaitForChild("PlayerGui"):GetChildren()) do
 	pcall(function() ui:Destroy() end)
 end
 
--- Следим за новыми объектами
+-- Новые объекты в мире — чистим, кроме персонажа игрока
 workspace.DescendantAdded:Connect(function(obj)
 	wait(0.05)
+	if LocalPlayer.Character and obj:IsDescendantOf(LocalPlayer.Character) then return end
 	stripVisuals({obj})
 end)
 
--- Очищаем новых персонажей игроков (не трогаем своего)
+-- Игроки: персонажи НЕ трогаем
 Players.PlayerAdded:Connect(function(plr)
 	plr.CharacterAdded:Connect(function(char)
 		wait(1)
@@ -67,24 +71,7 @@ Players.PlayerAdded:Connect(function(plr)
 	end)
 end)
 
--- Убираем звуки
-for _, s in ipairs(workspace:GetDescendants()) do
-	if s:IsA("Sound") then
-		s:Destroy()
-	end
-end
-
--- Удаляем анимации и отключаем эффекты своего персонажа
-LocalPlayer.CharacterAdded:Connect(function(char)
-	wait(1)
-	for _, child in ipairs(char:GetDescendants()) do
-		if child:IsA("ParticleEmitter") or child:IsA("Trail") or child:IsA("Sound") then
-			child:Destroy()
-		end
-	end
-end)
-
--- Автоочистка каждые 15 секунд
+-- Цикл автоочистки
 while true do
 	wait(15)
 	stripVisuals(workspace)
