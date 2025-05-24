@@ -1,0 +1,109 @@
+-- Services
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local VirtualUser = game:GetService("VirtualUser")
+local StarterGui = game:GetService("StarterGui")
+
+-- Обеспечиваем включённый рендеринг
+RunService:Set3dRenderingEnabled(true)
+
+-- Очистка эффектов Lighting
+local function clearLighting()
+    for _, object in pairs(Lighting:GetChildren()) do
+        object:Destroy()
+    end
+end
+Lighting.ChildAdded:Connect(function(child)
+    child:Destroy()
+end)
+
+-- Установка прозрачности и материала
+local function setTransparency(object)
+    if object:IsA("BasePart") then
+        object.Transparency = 1
+        object.Material = Enum.Material.Plastic
+    end
+end
+
+local function processWorkspace()
+    for _, object in ipairs(Workspace:GetDescendants()) do
+        setTransparency(object)
+    end
+end
+Workspace.DescendantAdded:Connect(setTransparency)
+
+-- Периодическая очистка каждые 5 минут
+task.spawn(function()
+    while true do
+        RunService:Set3dRenderingEnabled(true)
+        clearLighting()
+        processWorkspace()
+        task.wait(300) -- 5 минут
+    end
+end)
+
+-- Чёрный фон поверх экрана
+local player = Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "BlackLabelGui"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+
+local blackLabel = Instance.new("Frame", screenGui)
+blackLabel.Size = UDim2.new(1, 0, 1, 0)
+blackLabel.Position = UDim2.new(0, 0, 0, 0)
+blackLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+blackLabel.BorderSizePixel = 0
+blackLabel.ZIndex = 10
+
+-- Anti-AFK
+Players.LocalPlayer.Idled:Connect(function()
+    VirtualUser:CaptureController()
+    VirtualUser:ClickButton2(Vector2.new())
+end)
+
+-- FPS Control Menu
+local fpsFrame = Instance.new("Frame", screenGui)
+fpsFrame.Size = UDim2.new(0, 200, 0, 100)
+fpsFrame.Position = UDim2.new(0, 10, 0, 10)
+fpsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+fpsFrame.BorderSizePixel = 0
+fpsFrame.ZIndex = 20
+
+local title = Instance.new("TextLabel", fpsFrame)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Text = "FPS: Регулятор"
+title.TextColor3 = Color3.new(1,1,1)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 18
+
+local dropDown = Instance.new("TextButton", fpsFrame)
+dropDown.Size = UDim2.new(1, -10, 0, 30)
+dropDown.Position = UDim2.new(0, 5, 0, 35)
+dropDown.Text = "Текущий: 3 FPS"
+dropDown.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+dropDown.TextColor3 = Color3.new(1,1,1)
+dropDown.Font = Enum.Font.SourceSans
+dropDown.TextSize = 16
+
+-- FPS кап значения
+local fpsOptions = {3, 15, 30, 60}
+local currentCap = 3
+
+-- Цикл для имитации FPS-ограничения
+task.spawn(function()
+    while true do
+        task.wait(1 / currentCap)
+    end
+end)
+
+-- Меню переключения FPS
+dropDown.MouseButton1Click:Connect(function()
+    local idx = table.find(fpsOptions, currentCap) or 1
+    local nextIdx = (idx % #fpsOptions) + 1
+    currentCap = fpsOptions[nextIdx]
+    dropDown.Text = "Текущий: " .. tostring(currentCap) .. " FPS"
+end)
