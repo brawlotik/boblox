@@ -1,0 +1,41 @@
+local player = game:GetService("Players").LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Создаём ScreenGui
+local blackoutGui = Instance.new("ScreenGui")
+blackoutGui.Name = "BlackoutUI"
+blackoutGui.ResetOnSpawn = false
+blackoutGui.IgnoreGuiInset = true
+blackoutGui.DisplayOrder = 9999 -- Поверх всего
+blackoutGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+blackoutGui.Parent = playerGui
+
+-- Чёрный фон
+local blackFrame = Instance.new("Frame")
+blackFrame.Size = UDim2.new(1, 0, 1, 0)
+blackFrame.Position = UDim2.new(0, 0, 0, 0)
+blackFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+blackFrame.BorderSizePixel = 0
+blackFrame.ZIndex = 9999
+blackFrame.Visible = true
+blackFrame.Parent = blackoutGui
+
+-- Кнопка управления
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 200, 0, 50)
+toggleButton.Position = UDim2.new(0.2, -25, 0.5, -25)
+toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+toggleButton.Text = "Скрыть экран"
+toggleButton.TextScaled = true
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.ZIndex = 10000
+toggleButton.Parent = blackoutGui
+
+-- Функция переключения
+local function toggleBlackout()
+	blackFrame.Visible = not blackFrame.Visible
+	toggleButton.Text = blackFrame.Visible and "hide" or "show"
+end
+
+toggleButton.MouseButton1Click:Connect(toggleBlackout)
