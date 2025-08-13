@@ -1,0 +1,58 @@
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+
+-- 🔻 2. Минимальные настройки графики и дальности
+Lighting.GlobalShadows = false
+Lighting.Brightness = 0
+Lighting.ClockTime = 12
+Lighting.FogStart = 0
+Lighting.FogEnd = 100 -- сильно ограничиваем дальность
+Lighting.OutdoorAmbient = Color3.new(0, 0, 0)
+Lighting.EnvironmentDiffuseScale = 0
+Lighting.EnvironmentSpecularScale = 0
+Lighting.ExposureCompensation = -5
+
+-- 🔻 3. Делаем все блоки прозрачными и отключаем тени
+local function simplifyParts(obj)
+	for _, part in ipairs(obj:GetDescendants()) do
+		pcall(function()
+			if part:IsA("BasePart") or part:IsA("MeshPart") then
+				part.Transparency = 1
+				part.CastShadow = false
+				part.Material = Enum.Material.SmoothPlastic
+			end
+		end)
+	end
+end
+
+-- 🔻 4. Удаляем все звуки
+local function removeSounds(obj)
+	for _, sound in ipairs(obj:GetDescendants()) do
+		pcall(function()
+			if sound:IsA("Sound") then
+				sound:Destroy()
+			end
+		end)
+	end
+end
+
+-- 🔻 5. Применяем очистку к миру
+simplifyParts(workspace)
+removeSounds(workspace)
+
+-- 🔄 Автоочистка новых объектов
+workspace.DescendantAdded:Connect(function(obj)
+	wait(0.05)
+	simplifyParts({obj})
+	removeSounds({obj})
+end)
+
+-- 🔄 Периодическая повторная очистка (на всякий случай)
+while true do
+	wait(15)
+	simplifyParts(workspace)
+	removeSounds(workspace)
+end
