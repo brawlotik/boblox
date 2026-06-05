@@ -1,0 +1,123 @@
+--[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+-- ✅ Load Orion Library
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
+
+-- Services
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local playerGui = player:FindFirstChild("PlayerGui")
+
+local uiVisibilityState = {}
+
+-- Default states (inverted logic)
+local afkMode = false -- Start with AFK mode OFF (Rendering & UI enabled)
+local fpsLimit = 60 -- Default FPS limit
+
+-- Store UI states
+if playerGui then
+    for _, gui in pairs(playerGui:GetChildren()) do
+        if gui:IsA("ScreenGui") then
+            uiVisibilityState[gui] = gui.Enabled
+        end
+    end
+end
+
+-- ✅ Toggle Rendering
+local function toggleRendering(state)
+    RunService:Set3dRenderingEnabled(state)
+    print(state and "✅ 3D Rendering Enabled!" or "❌ 3D Rendering Disabled!")
+end
+
+-- ✅ Toggle UI
+local function toggleUI(state)
+    StarterGui:SetCore("TopbarEnabled", state)
+
+    if playerGui then
+        for _, gui in pairs(playerGui:GetChildren()) do
+            if gui:IsA("ScreenGui") then
+                gui.Enabled = state and (uiVisibilityState[gui] or false)
+            end
+        end
+    end
+
+    print(state and "✅ UI Enabled!" or "❌ UI Disabled!")
+end
+
+-- ✅ Set FPS Cap
+local function setFPSLimit(fps)
+    if setfpscap then
+        setfpscap(fps)  
+        print("✅ FPS Limit set to " .. fps)
+    else
+        warn("Executor does not support setfpscap!")
+    end
+end
+
+-- ✅ Toggle AFK Mode (Inverted Logic)
+local function toggleAFKMode(state)
+    afkMode = state -- Store AFK state
+    toggleRendering(not afkMode) -- If AFK mode is ON, disable rendering
+    toggleUI(not afkMode) -- If AFK mode is ON, disable UI
+end
+
+-- ✅ Ensure UI & Rendering Start in Enabled State
+toggleUI(true)
+toggleRendering(true)
+
+-- ✅ Press "L" to Toggle AFK Mode
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.L then
+        toggleAFKMode(not afkMode)
+    end
+end)
+
+-- ✅ Create Orion UI Window
+local Window = OrionLib:MakeWindow({
+    Name = "Performance Control",
+    HidePremium = false,
+    SaveConfig = false,
+    ConfigFolder = "OrionPerformanceControl"
+})
+
+local AFKTab = Window:MakeTab({
+    Name = "AFK Mode",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+AFKTab:AddLabel("Enable this when AFK to reduce GPU usage.")
+
+AFKTab:AddToggle({
+    Name = "AFK Mode (Disables Rendering & UI)",
+    Default = false,
+    Callback = function(state)
+        toggleAFKMode(state)
+    end
+})
+
+local FPSTab = Window:MakeTab({
+    Name = "FPS Limiter",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+FPSTab:AddTextbox({
+    Name = "Set FPS Limit",
+    Default = "60",
+    Callback = function(input)
+        local fps = tonumber(input)
+        if fps and fps > 0 then
+            setFPSLimit(fps)
+        else
+            print("❌ Invalid FPS value!")
+        end
+    end
+})
+
+OrionLib:Init()
