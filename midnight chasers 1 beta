@@ -181,7 +181,7 @@ example:AddToggle("Auto Farm", function(state)
 		}
 
 		for i, v in pairs(frames) do
-			local speed = getfenv().speed or 600
+			local speed = getfenv().speed or 450
 			local pos = v + Vector3.new(0, 5, 0)
 			tweenToPosition(car, pos, speed)
 		end
