@@ -1,0 +1,95 @@
+task.spawn(function()
+	for i, v in pairs(workspace:GetDescendants()) do
+		if v.ClassName == "Model" then
+			task.spawn(function()
+				game.Players.LocalPlayer:RequestStreamAroundAsync(v.WorldPivot.Position, 3)
+			end)
+			task.wait()
+		end
+	end
+end)
+
+warn("Anti afk launching")
+game:GetService("Players").LocalPlayer.Idled:connect(function()
+	warn("Anti afk launched successfully!!!")
+	game:GetService("VirtualUser"):CaptureController()
+	game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+end)
+
+local function hideWorkspaceObjects(plr)
+	if not game.ReplicatedStorage:FindFirstChild("mrbackupfolder") then
+		local folder = Instance.new("Folder", game.ReplicatedStorage)
+		folder.Name = "mrbackupfolder"
+	end
+	for i, v in pairs(workspace:GetChildren()) do
+		if (v.ClassName == "Model" and not string.find(v.Name, plr.Name) and not string.find(v.Name, plr.DisplayName) and not string.find(v.Name, "Gift") and v.Name ~= "") or
+		   (v.ClassName == "Folder" and not string.find(v.Name, plr.Name) and not string.find(v.Name, plr.DisplayName) and not string.find(v.Name, "Gift") and v.Name ~= "") or
+		   v:IsA("MeshPart") then
+			v.Parent = game.ReplicatedStorage:FindFirstChild("mrbackupfolder")
+		end
+	end
+end
+
+local function ensureGroundPart()
+	if not _G.ooga then
+		local new = Instance.new("Part", workspace)
+		new.Anchored = true
+		new.Size = Vector3.new(10000, 10, 10000)
+		_G.ooga = new
+	end
+end
+
+local function tweenToPosition(car, targetPos, speed)
+	local plr = game.Players.LocalPlayer
+	local dist = (plr.Character.HumanoidRootPart.Position - targetPos.Position).magnitude
+	local TweenService = game:GetService("TweenService")
+	local TweenInfoToUse = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, false, 0)
+	local TweenValue = Instance.new("CFrameValue")
+	TweenValue.Value = car:GetPrimaryPartCFrame()
+
+	TweenValue.Changed:Connect(function()
+		local test = TweenValue.Value.Position
+		_G.ooga.Position = test - Vector3.new(0, 14, 0)
+		car:PivotTo(CFrame.new(_G.ooga.Position + Vector3.new(0, 7, 0), targetPos.Position))
+		local velo = car.PrimaryPart.CFrame.LookVector * speed
+		car.PrimaryPart.AssemblyLinearVelocity = velo
+	end)
+
+	getfenv().tween = TweenService:Create(TweenValue, TweenInfoToUse, {
+		Value = targetPos
+	})
+	getfenv().tween:Play()
+	repeat
+		task.wait(0)
+	until getfenv().tween.PlaybackState == Enum.PlaybackState.Cancelled or
+		  getfenv().tween.PlaybackState == Enum.PlaybackState.Completed or
+		  getfenv().tween.PlaybackState == Enum.PlaybackState.Paused
+end
+
+-- Запуск Auto Farm
+task.spawn(function()
+	local plr = game.Players.LocalPlayer
+	hideWorkspaceObjects(plr)
+	task.wait()
+	getfenv().auto = true
+
+	while getfenv().auto do
+		local chr = plr.Character
+		local hum = chr.Humanoid
+		local car = hum.SeatPart.Parent
+		getfenv().car = car
+		ensureGroundPart()
+		car.PrimaryPart = car.Body:FindFirstChild("#Weight")
+
+		local frames = {
+			CFrame.new(105.419128, -26.0098934, 7965.37988, -3.36170197e-05, 0.951051414, -0.309032798, -1, -3.36170197e-05, 5.31971455e-06, -5.31971455e-06, 0.309032798, 0.951051414),
+			CFrame.new(2751.86499, -26.0098934, 3694.63354, 3.34978104e-05, 0.951051414, -0.309032798, -1, 3.34978104e-05, -5.31971455e-06, 5.31971455e-06, 0.309032798, 0.951051414)
+		}
+
+		for i, v in pairs(frames) do
+			local speed = getfenv().speed or 450
+			local pos = v + Vector3.new(0, 5, 0)
+			tweenToPosition(car, pos, speed)
+		end
+	end
+end)
