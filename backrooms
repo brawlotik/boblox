@@ -1,0 +1,56 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+local itemsFolder = workspace:WaitForChild("GameTriggers"):WaitForChild("Items")
+
+-- Телепортирует все предметы из папки к персонажу
+local function teleportAllItemsToPlayer()
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    for _, item in ipairs(itemsFolder:GetChildren()) do
+        -- Если это Model — ищем PrimaryPart или любой BasePart
+        if item:IsA("Model") then
+            if item.PrimaryPart then
+                item:SetPrimaryPartCFrame(hrp.CFrame + Vector3.new(0, 3, 0))
+            else
+                local part = item:FindFirstChildWhichIsA("BasePart")
+                if part then
+                    part.CFrame = hrp.CFrame + Vector3.new(0, 3, 0)
+                end
+            end
+        -- Если это просто Part/MeshPart/etc.
+        elseif item:IsA("BasePart") then
+            item.CFrame = hrp.CFrame + Vector3.new(0, 3, 0)
+        end
+    end
+
+    print("Телепортировано предметов: " .. #itemsFolder:GetChildren())
+end
+
+-- Телепортировать сразу при запуске
+teleportAllItemsToPlayer()
+
+-- Также телепортировать каждый раз, когда в папку добавляется новый предмет
+itemsFolder.ChildAdded:Connect(function(newItem)
+    task.wait(0.1) -- небольшая задержка, чтобы предмет успел загрузиться
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    if newItem:IsA("Model") then
+        if newItem.PrimaryPart then
+            newItem:SetPrimaryPartCFrame(hrp.CFrame + Vector3.new(0, 3, 0))
+        else
+            local part = newItem:FindFirstChildWhichIsA("BasePart")
+            if part then
+                part.CFrame = hrp.CFrame + Vector3.new(0, 3, 0)
+            end
+        end
+    elseif newItem:IsA("BasePart") then
+        newItem.CFrame = hrp.CFrame + Vector3.new(0, 3, 0)
+    end
+
+    print("Новый предмет телепортирован: " .. newItem.Name)
+end)
